@@ -1,0 +1,263 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Acceso";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+<!-- /theme JS files -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Configuración de Accesos</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnConsultaAcceso"><i class="icon-users2"></i> Consultar Usuario</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Vertical form options -->
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Basic layout-->
+                <form id="FormAcceso">
+                    <div class="panel panel-flat">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>Aplicación:</label>
+                                @Html.DropDownList("ddlAplicacion", Model.Aplicaciones, new { @data_placeholder = "Aplicaciones", @class = "select", @disabled = "disabled" })
+                            </div>
+                            <div class="form-group">
+                                <label>Usuario:</label>
+                                <select class="form-control " id="ddlUsuario" name="ddlUsuario"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Unidad:</label>
+                                @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                            </div>
+                            <div class="form-group">
+                                <label>Perfil:</label>
+                                @Html.DropDownList("ddlPerfil", Model.Perfiles, new { @data_placeholder = "Perfiles", @class = "select", @multiple = "multiple" })
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary">Dar Permiso</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- /basic layout -->
+            </div>
+        </div>
+        <!-- /vertical form options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .ui-autocomplete {
+            z-index: 215000000 !important;
+        }
+        .select2-no-results {
+            display: none !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+
+    $("#ddlUsuario").select2({
+        ajax: {
+            //url: 'Url.Content("~")' + 'api/SEG/GetUsuariosPorNombre/N',
+            url: function () {
+                return urls.SEGApi.GetUsuariosPorNombre('N');
+            },
+            dataType: 'json',
+            type: "GET",
+            delay: 250,
+            data: function (params) {
+                return {
+                    term: params.term,
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.cod_usuario,
+                            text: item.des_usuario
+                        }
+                    })
+                };
+            },
+            cache: true
+        },
+        templateResult: function (item) {
+            if (item.loading) return item.text;
+            return item.text;
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+        //tags: true, // Esta opcion sirve para que el valor que se escriba aparezca como un select option
+    });
+
+    $(document).ready(function () {
+
+        $('#ddlUsuario').change(function () {
+            $('#ddlPerfil').empty();
+            var selectedAplicacion = $("#ddlAplicacion").val();
+            var selectedUnidad = $("#ddlUnidad").val();
+            var selectedUsuario = $(this).val();
+            if (selectedUsuario != null && selectedUsuario != '') {
+                $.getJSON('@Url.Action("JSON_GetPerfilesPorUsuario")', { cod_aplicacion: selectedAplicacion, cod_unidad_negocio: selectedUnidad, cod_usuario: selectedUsuario }, function (perfiles) {
+                    var perfilesSelect = $('#ddlPerfil');
+                    perfilesSelect.empty();
+                    $.each(perfiles, function (index, perfil) {
+                        perfilesSelect.append($('<option/>', {
+                            value: perfil.Value,
+                            text: perfil.Text,
+                            selected: perfil.Selected
+                        }));
+                    });
+                });
+            }
+        });
+
+        $('#ddlUnidad').change(function () {
+            $('#ddlPerfil').empty();
+            var selectedAplicacion = $("#ddlAplicacion").val();
+            var selectedUnidad = $(this).val();
+            var selectedUsuario = $("#ddlUsuario").val();
+            if (selectedUsuario != null && selectedUsuario != '' && selectedUnidad != null && selectedUnidad != '') {
+                $.getJSON('@Url.Action("JSON_GetPerfilesPorUsuario")', { cod_aplicacion: selectedAplicacion, cod_unidad_negocio: selectedUnidad, cod_usuario: selectedUsuario }, function (perfiles) {
+                    var perfilesSelect = $('#ddlPerfil');
+                    perfilesSelect.empty();
+                    $.each(perfiles, function (index, perfil) {
+                        perfilesSelect.append($('<option/>', {
+                            value: perfil.Value,
+                            text: perfil.Text,
+                            selected: perfil.Selected
+                        }));
+                    });
+                });
+            }
+        });
+
+    });
+
+    $(function () {
+        var accesoValidator = $('#FormAcceso').validate({
+            rules: {
+                ddlAplicacion: {
+                    required: true
+                },
+                ddlUnidad: {
+                    required: true,
+                },
+                ddlUsuario: {
+                    required: true
+                }
+            },
+            messages: {
+                ddlUsuario: {
+                    required: 'Seleccione un usuario'
+                }
+            },
+            highlight: function (element) {
+                $(element).parent().addClass('validation-error-label')
+            },
+            unhighlight: function (element) {
+                $(element).parent().removeClass('validation-error-label')
+            },
+
+            submitHandler: function (form, e) {
+                var _perfiles = $('#ddlPerfil').val();
+                if (_perfiles != null) {
+                    _perfiles = $.map($('#ddlPerfil').val(), function (item) {
+                        if (item) {
+                            return {
+                                Value: Number(item)
+                            }
+                        }
+                    });
+                }
+
+                var _acceso = {
+                    cod_usuario: $("#lblCodUsuario").text(),
+                    cod_usuario_accion: $('#ddlUsuario').val(),
+                    cod_aplicacion: $('#ddlAplicacion').val(),
+                    cod_unidad_negocio: $('#ddlUnidad').val(),
+                    accion: 'Update',
+                    Perfiles: _perfiles
+                };
+
+                var _url = '@Url.Action("Acceso", "SEG")';
+
+                $.post(_url, _acceso).done(function (data) {
+                    if (data.Status === 200) {
+                        toastr.success(data.Message)
+                    }
+                    else {
+                        toastr.error(data.Message)
+                    }
+                });
+            }
+        });
+
+    });
+
+    $('#btnConsultaAcceso').on('click', function () {
+        var frec = $('#ddlFrecuencia').val();
+        var un = $('#ddlUnidad').val();
+        var baseUrl = "@Url.Action("Consulta", "SEG")?idx=@Session.SessionID&cod_unidad_negocio="+un+"&cod_frecuencia="+frec;
+        window.location.href=baseUrl;
+    });
+    </script>
+}

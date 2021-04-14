@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="cn-Web.config Connection String" description="cn Connection String used in web.config by the application to access the database." defaultValue="Data Source=svdcxdpd0;initial catalog=GESMINSURPRO;uid=gtotal;pwd=g20504812635t" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="D:\\Proyectos\\mvc\\Minsur\\Presentacion\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='cn']/@connectionString" />
+  </parameter>
+</parameters>

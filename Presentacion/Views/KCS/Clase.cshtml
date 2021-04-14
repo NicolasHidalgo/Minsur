@@ -1,0 +1,589 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Clase";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar por Cuenta</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormCeco">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="txtClaseCoste" class="col-form-label">Clase de coste</label>
+                            <input type="text" class="form-control" id="txtClaseCoste" name="txtClaseCoste">
+                        </div>
+
+                        <div class="form-group col-md-9">
+                            <label for="txtDetalleClase" class="col-form-label">Detalle Clase Coste</label>
+                            <input type="text" class="form-control" id="txtDetalleClase" name="txtDetalleClase">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlTipoCuenta" class="col-form-label">Tipo Gasto</label>
+                            @Html.DropDownList("ddlTipoGasto", Model.ddlTipo, "", new { @data_placeholder = "Tipo Gasto" })
+                            @*<select class="form-control" name="ddlTipoGasto" id="ddlTipoGasto"></select>*@
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlCategoria" class="col-form-label">Categoria</label>
+                            @Html.DropDownList("ddlCategoria", Model.ddlCategoria, "", new { @data_placeholder = "Categorias" })
+                            @*<select class="form-control" name="ddlCategoria" id="ddlCategoria"></select>*@
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="ddlTipoCuenta" class="col-form-label">Tipo Cuenta</label>
+                            <select class="form-control" name="ddlTipoCuenta" id="ddlTipoCuenta">
+                                <option value=""></option>
+                                <option value="FIJA">FIJA</option>
+                                <option value="VARIABLE">VARIABLE</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="txtGrupoCosto" class="col-form-label">Grupo Costo</label>
+                            <input type="text" class="form-control" id="txtGrupoCosto" name="txtGrupoCosto">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Configuracion de Clase de Costo</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                @*<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            @*<div class="panel-heading">
+                    <h5 class="panel-title">Basic datatable</h5>
+                    <div class="heading-elements">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse"></a></li>
+                            <li><a data-action="reload"></a></li>
+                            <li><a data-action="close"></a></li>
+                        </ul>
+                    </div>
+                </div>*@
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="ddlPeriodoFilter" class="col-form-label">Unidad</label>
+                        @Html.DropDownList("ddlUnidadFilter", Model.ddlUnidad, new { @data_placeholder = "Unidades", @class = "form-control" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlPeriodoFilter" class="col-form-label">Periodo</label>
+                        @Html.DropDownList("ddlPeriodoFilter", Model.Periodos, new { @data_placeholder = "Periodos", @class = "form-control" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="ddlTipoGastoFilter" class="col-form-label">Tipo Gasto</label>
+                        @Html.DropDownList("ddlTipoGastoFilter", Model.ddlTipo, "",new { @data_placeholder = "Tipo Gasto" })
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="ddlCategoriaFilter" class="col-form-label">Categoria</label>
+                        @Html.DropDownList("ddlCategoriaFilter", Model.ddlCategoria, "",new { @data_placeholder = "Categorias" })
+                    </div>
+                </div>
+            </div>
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+$(function () {
+
+    $('#ddlUnidadFilter,#ddlPeriodoFilter,#ddlTipoCuenta').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    $('#ddlTipoGastoFilter,#ddlCategoriaFilter,#ddlTipoGasto,#ddlCategoria').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.KCSApi.GetDataTable_Clase(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                    cod_usuario: $('#lblCodUsuario').text(),
+                    periodo: $('#ddlPeriodoFilter option:selected').val(),
+                    tipo_gasto: $('#ddlTipoGastoFilter option:selected').val(),
+                    categoria: $('#ddlCategoriaFilter option:selected').val(),
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Clase de coste',
+            data: 'cod_cuenta',
+            name: 'cod_cuenta',
+            className: 'cod_cuenta text-center',
+            responsivePriority: 1,
+            width: '5%'
+        },
+        {
+            title: 'Detalle Clase Coste',
+            data: 'nom_cuenta',
+            name: 'nom_cuenta',
+            className: 'nom_cuenta',
+            width: '20%'
+        },
+        {
+            title: 'Tipo_Gasto',
+            data: 'tip_gasto',
+            name: 'tip_gasto',
+            className: 'tip_gasto text-center',
+            width: '5%'
+        },
+        {
+            title: 'Código',
+            data: 'cod_categoria',
+            name: 'cod_categoria',
+            className: 'cod_categoria text-center',
+            width: '5%'
+        },
+        {
+            title: 'Categoría',
+            data: 'nom_categoria',
+            name: 'nom_categoria',
+            className: 'nom_categoria',
+            width: '20%'
+        },
+        {
+            title: 'Tipo_Cuenta',
+            data: 'tip_cuenta',
+            name: 'tip_cuenta',
+            className: 'tip_cuenta text-center',
+            width: '5%'
+        },
+        {
+            title: 'Grupo Costo',
+            data: 'grupo_costo',
+            name: 'grupo_costo',
+            className: 'grupo_costo text-center',
+            width: '5%'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.cod_cuenta + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                //dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_cuenta + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+    });
+
+    $('#ddlUnidadFilter').on('change', function () {
+        if ($('#ddlUnidadFilter').val() == null || $('#ddlUnidadFilter').val() == "") {
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetClaseData")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: 0 }, function (data) {
+            $('#ddlPeriodoFilter,#ddlTipoGastoFilter,#ddlCategoriaFilter').empty();
+            var select = $('#ddlPeriodoFilter');
+            select.empty();
+            var i = 0;
+
+            if (data.ddlPeriodo.length == 0) {
+                $('#ddlTipoGastoFilter').empty();
+                $('#ddlCategoriaFilter').empty();
+                $("#overlay").hide();
+                return;
+            }
+
+            $.each(data.ddlPeriodo, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+
+            $('#ddlTipoGastoFilter,#ddlTipoGasto').empty();
+            i = 0;
+            $.each(data.ddlTipo, function (index, item) {
+                i += 1;
+                $('#ddlTipoGastoFilter').append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+                $('#ddlTipoGasto').append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+
+            $('#ddlCategoriaFilter,#ddlCategoria').empty();
+            i = 0;
+            $.each(data.ddlCategoria, function (index, item) {
+                i += 1;
+                $('#ddlCategoriaFilter').append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+                $('#ddlCategoria').append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+            $("#overlay").hide();
+            $('#ddlTipoGastoFilter').val("");
+            $('#ddlCategoriaFilter').val("");
+            PlantillaDataTable.draw();
+            return;
+
+        });
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+
+    $('#ddlPeriodoFilter,#ddlTipoGastoFilter,#ddlCategoriaFilter').on('change', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+
+     var codValidator = $('#FormCeco').validate({
+        rules: {
+            txtClaseCoste: {
+                required: true
+            },
+            txtDetalleClase: {
+                required: true
+            },
+            ddlTipoGasto: {
+                required: true
+            },
+            ddlCategoria: {
+                required: true
+            },
+            //ddlTipoCuenta: {
+            //    required: true
+            //},
+            txtGrupoCosto: {
+                required: true
+            }
+        },
+        messages: {
+            txtClaseCoste: {
+                required: 'Requerido'
+            },
+            txtDetalleClase: {
+                required: 'Requerido'
+            },
+            ddlTipoGasto: {
+                required: 'Requerido'
+            },
+            ddlCategoria: {
+                required: 'Requerido'
+            },
+            //ddlTipoCuenta: {
+            //    required: 'Seleccione Nivel 3'
+            //},
+            txtGrupoCosto: {
+                required: 'Requerido'
+            },
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            $('#RegistroModal').modal('toggle');
+            $("#overlay").show();
+
+            var _obj = {
+                cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                cod_cuenta: $('#lblCodOrigen').val(),
+                cod_categoria: $('#ddlCategoria option:selected').val(),
+                tip_cuenta: $('#ddlTipoCuenta option:selected').val(),
+                tip_gasto: $('#ddlTipoGasto option:selected').val(),
+                grupo_costo: $('#txtGrupoCosto').val(),
+                periodo: $('#ddlPeriodoFilter option:selected').val(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Clase", "KCS")';
+
+            $.post(_url, _obj).done(function (data) {
+                $("#overlay").hide();
+                if (data.Status === 200) {
+                    toastr.success(data.Message);
+                    PlantillaDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+    $('#btnEliminar').on('click', function () {
+        $('#ConfirmarModal').modal('toggle');
+        $("#overlay").show();
+
+        var _obj = {
+            cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+            periodo: $('#ddlPeriodoFilter option:selected').val(),
+            cod_cuenta: $("#showid").val(),
+            accion: 'DELETE'
+        };
+
+        var _url = '@Url.Content("~")'+'KCS/Edit_Clase'
+
+        $.post(_url, _obj).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                toastr.success(data.Message);
+                PlantillaDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            $("#overlay").hide();
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var ide = $(this).data('id');
+        $("#showid").val(ide);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#RegistroModal').on('show.bs.modal', function (event) {
+        if (event.relatedTarget === undefined) return;
+        if (event.namespace === 'bs.modal') { // previene que el datepicker no limpie otros inputs
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            $(".validation-error-label").removeClass("validation-error-label");
+            $(".error").remove();
+
+            var action = button.data('whatever');
+            var titulo = "";
+
+            if (action == 'UPDATE') {
+                titulo = "ACTUALIZAR";
+                $("#txtClaseCoste").val(button.closest("tr").find(".cod_cuenta").text());
+                $("#txtClaseCoste").prop('disabled', true);
+
+                $("#txtDetalleClase").val(button.closest("tr").find(".nom_cuenta").text());
+                $("#txtDetalleClase").prop('disabled', true);
+
+                $("#txtGrupoCosto").val(button.closest("tr").find(".grupo_costo").text());
+                $("#txtGrupoCosto").prop('disabled', true);
+
+                $("#ddlCategoria").val(button.closest("tr").find(".cod_categoria").text()).change();
+                $("#ddlTipoGasto").val(button.closest("tr").find(".tip_gasto").text()).change();
+                $("#ddlTipoCuenta").val(button.closest("tr").find(".tip_cuenta").text()).change();
+
+            } else {
+                titulo = "AGREGAR";
+            }
+
+            $("#lblAccion").val(action);
+            $("#lblCodOrigen").val($.trim(button.closest("tr").find(".cod_cuenta").text()));
+            var modal = $(this)
+            modal.find('.modal-title').text(titulo)
+            //modal.find('.modal-body input').val(recipient)
+        }
+    });
+
+});
+
+    </script>
+}

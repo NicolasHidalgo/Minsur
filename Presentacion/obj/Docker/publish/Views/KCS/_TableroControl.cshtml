@@ -1,0 +1,5 @@
+﻿@using ReportViewerForMvc;
+
+@Html.ReportViewer(
+                ViewBag.ReportViewer as Microsoft.Reporting.WebForms.ReportViewer,
+                new { SizeToReportContent = true, Width = "100%", Height = "100%", scrolling = "no" })

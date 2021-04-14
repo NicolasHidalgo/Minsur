@@ -1,0 +1,168 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "RepCampania";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+<!-- /theme JS files -->
+
+<!-- Basic modal -->
+<div id="modal_default" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal" id="BtnCancelar">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="BtnAceptar">Aceptar</button>
+                <label id="lblId" class="hidden"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Reporte de Camapañas</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Bootstrap file input -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <p id="pPanel" class="content-group hidden">Proceso que permite cargar el contenido de una hoja excel al sistema. Debe respetarse el formato acorde con la configuración de la plantilla y la hoja de contenido debe llamarse <code> BD BalMet</code></p>
+                <form id="FormCampana" class="row">
+                    <label id="lblNomenclatura" class="hidden"></label>
+
+                    <div class="form-group col-md-2">
+                        <label for="ddlCampania">Campaña</label>
+                        @Html.DropDownList("ddlCampania", Model.DropDownList, new { @data_placeholder = "Campañas", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="txtBatchDesde"">Batch Desde</label>
+                        <input type="number" class="form-control" min="0" value="0" id="txtBatchDesde" name="txtBatchDesde" required>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="txtBatchHasta">Batch Hasta</label>
+                        <input type="number" class="form-control" min="0" value="0" id="txtBatchHasta" name="txtBatchHasta" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="dpFecInforme">Fecha Informe</label>
+                        <div class="input-group date col-md-12">
+                            <input type="text" class="form-control" id="dpFecInforme" name="dpFecInforme" value="" />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <div class="spacer"></div>
+                        <button type="submit" class="btn btn-primary mb-2">Generar Reporte</button>
+                    </div>
+                </form>
+                <div id="divAlert" class="alert alert-danger alert-styled-left alert-bordered hidden"></div>
+            </div>
+        </div>
+        <!-- /basic layout -->
+        <!-- /vertical form options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+    $('#dpFecInforme').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+</script>
+
+@section Styles{
+    <style>
+        .spacer {
+            margin: 0;
+            padding: 0;
+            height: 25px;
+        }
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+$(function () {
+    //$('#staticParent').on('keydown', '#txtBatchDesde', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+    var campanaValidator = $('#FormCampana').validate({
+
+        submitHandler: function (form, e) {
+            $("#overlay").show();
+            var codUnidadNegocio = $('#lblCodUnidadNegocio').text();
+            var codUsuario = $("#lblCodUsuario").val();
+            var batchDesde = $("#txtBatchDesde").val();
+            if (batchDesde == null || batchDesde == "")
+                batchDesde = 0;
+            var batchHasta = $("#txtBatchHasta").val();
+            if (batchHasta == null || batchHasta == "")
+                batchHasta = 0
+            var campania = $("#ddlCampania option:selected").val();
+            var codFrecuencia = 'D';
+            var fecInforme = $("#dpFecInforme").val();
+
+            var _url = '@Url.Action("RunXlsCampania", "BAL")?idx=@Session.SessionID&cod_unidad_negocio=' + codUnidadNegocio + '&fec_informe=' + fecInforme + '&campania=' + campania + '&batch_desde=' + batchDesde + '&batch_hasta=' + batchHasta;
+
+            $.post(_url, null).done(function (data) {
+                $("#overlay").hide();
+                if (data.Status === 200) {
+                    window.location.href = '@Url.Content("~")' + 'BAL/DownloadFile?archivoDestino=' + data.Message + '&idx=@Session.SessionID';
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+});
+
+</script>
+}

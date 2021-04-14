@@ -1,0 +1,500 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Indicador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar:</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormPlantilla">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtCodIndicador" class="col-form-label">Cod Indicador</label>
+                            <input type="text" class="form-control onlyNumber" id="txtCodIndicador" name="txtCodIndicador">
+                        </div>
+                        <div class="form-group col-md-8">
+                            <label for="txtNomIndicador" class="col-form-label">Nom Indicador</label>
+                            <input type="text" class="form-control" id="txtNomIndicador" name="txtNomIndicador">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlUnidad" class="col-form-label">Unidad</label>
+                            @Html.DropDownList("ddlUnidadNegocio", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtUnidad" class="col-form-label">UM</label>
+                            <input type="text" class="form-control" id="txtUnidad" name="txtUnidad">
+                        </div>
+                        <div class="form-group col-md-8">
+                            <label for="ddlTipoIndicador" class="col-form-label">Tipo Indicador</label>
+                            @Html.DropDownList("ddlTipoIndicador", Model.ddlTipo, new { @data_placeholder = "Tipo", @class = "select" })
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtTipoVariacion" class="col-form-label">Tipo Variacion</label>
+                            <input type="text" class="form-control onlyNumber" id="txtTipoVariacion" name="txtTipoVariacion">
+                        </div>
+                        <div class="form-group col-md-8">
+                            <label for="ddlFrecuencia" class="col-form-label">Frecuencia</label>
+                            @*@Html.DropDownList("ddlFrecuencia", Model.ddlFrecuencia, new { @data_placeholder = "Frecuencia", @class = "select" })*@
+                            @Html.DropDownList("ddlFrecuencia", Model.ddlFrecuencia, new { @data_placeholder = "Frecuencia", @multiple = "multiple" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodTajoOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Plantilla Indicador</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                <li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+
+            <div class="panel-body">
+                <div class="form-group col-md-6">
+                    <label for="ddlTipoFilter" class="col-form-label">Tipo</label>
+                    @Html.DropDownList("ddlTipoFilter", Model.ddlTipoFilter, new { @data_placeholder = "Tipo", @class = "select" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="ddlUnidadFilter" class="col-form-label">Unidad</label>
+                    @Html.DropDownList("ddlUnidadFilter", Model.ddlUnidadFilter, new { @data_placeholder = "Unidad", @class = "select" })
+                </div>
+            </div>
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+$(function () {
+    $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+})
+$(function () {
+
+    $('#ddlTipoFilter,#ddlUnidadFilter').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    $('#ddlUnidadNegocio,#ddlTipoIndicador,#ddlFrecuencia').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.APPApi.GetDataTable_Plantilla(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    tip_indicador: $('#ddlTipoFilter').val(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter').val(),
+                    accion: 'SELECT_INDICADOR'
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Cod. Indicador',
+            data: 'cod_indicador',
+            name: 'cod_indicador',
+            className: 'cod_indicador',
+            responsivePriority: 1,
+            width: '10%'
+        },
+        {
+            title: 'UN',
+            data: 'cod_unidad_negocio',
+            name: 'cod_unidad_negocio',
+            className: 'cod_unidad_negocio'
+        },
+        {
+            title: 'Nom. Indicador',
+            data: 'nom_indicador',
+            name: 'nom_indicador',
+            className: 'nom_indicador'
+        },
+        {
+            title: 'UM',
+            data: 'und_indicador',
+            name: 'und_indicador',
+            className: 'und_indicador text-center',
+            width: '5%'
+        },
+        {
+            title: 'Tipo',
+            data: 'tip_indicador',
+            name: 'tip_indicador',
+            className: 'tip_indicador',
+        },
+        {
+            title: 'Variacion',
+            data: 'tip_variacion',
+            name: 'tip_variacion',
+            className: 'tip_variacion text-center',
+            width: '5%'
+        },
+        {
+            title: 'Frecuencia',
+            data: 'frecuencia',
+            name: 'frecuencia',
+            className: 'frecuencia text-center',
+            width: '5%'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.cod_indicador + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_indicador + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+    $('#ddlTipoFilter,#ddlUnidadFilter').on('change', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+
+    var codValidator = $('#FormPlantilla').validate({
+        rules: {
+            txtIdePlantilla: {
+                required: true
+            },
+            txtNomIndicador: {
+                required: true
+            },
+            txtUM: {
+                required: true
+            },
+            ddlTipoIndicador: {
+                required: true
+            },
+            ddlFrecuencia: {
+                required: true
+            },
+        },
+        messages: {
+            txtIdePlantilla: {
+                required: 'Requerido'
+            },
+            txtNomIndicador: {
+                required: 'Requerido'
+            },
+            txtUM: {
+                required: 'Requerido'
+            },
+            ddlTipoIndicador: {
+                required: 'Requerido'
+            },
+            ddlFrecuencia: {
+                required: 'Requerido'
+            },
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            var _frecuencias = '';
+            if ($("#ddlFrecuencia").val() != null)
+                _frecuencias = $("#ddlFrecuencia").val().join(",");
+            
+            var _obj = {
+                cod_unidad_negocio: $('#ddlUnidadNegocio option:selected').val(),
+                nom_indicador: $('#txtNomIndicador').val(),
+                und_indicador: $('#txtUnidad').val(),
+                tip_indicador: $('#ddlTipoIndicador option:selected').val(),
+                tip_variacion: $('#txtTipoVariacion').val(),
+                cod_indicador: $('#txtCodIndicador').val(),
+                frecuencia: _frecuencias, //$("#ddlFrecuencia").val(),
+                accion: $("#lblAccion").val() + '_INDICADOR'
+            };
+
+            var _url = '@Url.Action("Edit_Plantilla", "APP")';
+
+            $.post(_url, _obj).done(function (data) {
+                if (data.Status === 200) {
+                    $('#RegistroModal').modal('toggle');
+                    toastr.success(data.Message);
+                    PlantillaDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+
+    $('#btnEliminar').on('click', function () {
+        var _obj = {
+            cod_indicador: $("#showid").val(),
+            accion: 'DELETE_INDICADOR'
+        };
+
+        var _url = '@Url.Action("Edit_Plantilla", "APP")';
+
+        $.post(_url, _obj).done(function (data) {
+            if (data.Status === 200) {
+                $('#ConfirmarModal').modal('toggle');
+                toastr.success(data.Message);
+                PlantillaDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var id = $(this).data('id');
+        $("#showid").val(id);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#RegistroModal').on('show.bs.modal', function (event) {
+        if (event.relatedTarget === undefined) return;
+        if (event.namespace === 'bs.modal') { // previene que el datepicker no limpie otros inputs
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            $(".validation-error-label").removeClass("validation-error-label");
+            $(".error").remove();
+
+            var action = button.data('whatever');
+            var titulo = "";
+
+
+            if (action == 'UPDATE') {
+                titulo = "ACTUALIZAR";
+                $("#txtCodIndicador").prop('disabled', true);
+                $("#txtCodIndicador").val(button.closest("tr").find(".cod_indicador").text());
+                $("#txtNomIndicador").val(button.closest("tr").find(".nom_indicador").text());
+                $("#txtUnidad").val(button.closest("tr").find(".und_indicador").text());
+                $("#ddlTipoIndicador").val(button.closest("tr").find(".tip_indicador").text()).change();
+                $("#ddlUnidadNegocio").val(button.closest("tr").find(".cod_unidad_negocio").text()).change();
+                $("#txtTipoVariacion").val(button.closest("tr").find(".tip_variacion").text());
+                $("#ddlFrecuencia").val(button.closest("tr").find(".frecuencia").text()).change();
+
+                var frec = button.closest("tr").find(".frecuencia").text();
+                if (frec != null) {
+                    var array = frec.split(',');
+                    $("#ddlFrecuencia").val(array).change();
+                }
+
+            } else {
+                titulo = "AGREGAR";
+                $("#txtCodIndicador").prop('disabled', false);
+                $("#txtCodIndicador").val('');
+                $("#txtNomIndicador").val('');
+                $("#ddlUnidadNegocio").val('').change();
+                $("#txtUnidad").val('');
+                $("#ddlTipoIndicador").val('').change();
+                $("#txtTipoVariacion").val('');
+                $("#ddlFrecuencia").val('').change();
+            }
+
+            $("#lblAccion").val(action);
+            //$("#lblCodTajoOrigen").val($.trim(button.closest("tr").find(".ide_plantilla").text()));
+            var modal = $(this)
+            modal.find('.modal-title').text(titulo)
+            //modal.find('.modal-body input').val(recipient)
+        }
+    });
+
+});
+
+
+    </script>
+}

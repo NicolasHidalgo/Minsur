@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DGestión</title>
+
+    @if (IsSectionDefined("Styles"))
+    {@RenderSection("Styles", required: false)}
+
+    <!-- Global stylesheets -->
+    <link rel="SHORTCUT ICON" href="~/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- Nico JS files -->
+    <script type="text/javascript" src="~/Scripts/string-format.js"></script>
+    <link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="~/Scripts/toastr.js"></script>
+    <script src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+    <script src="~/Scripts/numeral/numeral.js"></script>
+
+    <!-- /Nico JS files -->
+    @using StackExchange.Profiling;
+
+</head>
+<body>
+    <!-- Header -->
+    @Html.Partial("_Header")
+
+    <!-- Page container -->
+    <div class="page-container">
+        <!-- Page content -->
+        <div class="page-content">
+            <!-- Main sidebar -->
+            <div class="sidebar sidebar-main">
+                <div class="sidebar-content">
+                    <!-- User menu -->
+                    <div class="sidebar-user">
+                        <div class="category-content">
+                            <div class="media">
+                                <a href="#" class="media-left"><img src="~/assets/images/appIcoKOP.png" class="img-circle img-sm" alt=""></a>
+                                <div class="media-body">
+                                    @if (Session["Usuario"] != null)
+                                    {
+                                        var usuario = (Beans.SEG_UsuarioBean)Session["Usuario"];
+                                        <span class="media-heading text-semibold">@usuario.nom_usuario</span>
+                                        if (Session["cod_aplicacion"] != null)
+                                        {
+                                            <label id="cod_aplicacion" hidden="hidden">@Session["cod_aplicacion"].ToString()</label>
+                                            <label id="lblCodUsuario" hidden="hidden">@usuario.cod_usuario</label>
+                                            if (Session["cod_unidad_negocio"] != null)
+                                            {
+                                                <label id="lblCodUnidadNegocio" hidden="hidden">@Session["cod_unidad_negocio"].ToString()</label>
+                                            }
+                                        }
+                                    }
+
+                                    @if (Session["clientId"] != null)
+                                    {
+                                        <div class="text-size-mini text-muted">
+                                            <i class="icon-pin text-size-small"></i> &nbsp;@Session["clientId"].ToString()
+                                        </div>
+                                    }
+                                </div>
+                                @*<div class="media-right media-middle">
+                                        <ul class="icons-list">
+                                            <li>
+                                                <a href="#"><i class="icon-cog3"></i></a>
+                                            </li>
+                                        </ul>
+                                    </div>*@
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /user menu -->
+                    <!-- Main navigation -->
+                    @helper Opciones()
+                        {
+                            <div class="sidebar-category sidebar-category-visible">
+                                <div class="category-content no-padding">
+                                    <ul class="navigation navigation-main navigation-accordion">
+                                        <li class="navigation-header"><span>MENÚ</span></li>
+                                        @if (Session["Opciones"] != null)
+                                        {
+                                            var opciones = (IEnumerable<Beans.SEG_MenuBean>)Session["Opciones"];
+                                            @OpcionHijos(opciones)
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    <!-- /main navigation -->
+                    @Opciones()
+                </div>
+            </div>
+            <!-- /main sidebar -->
+            <!-- Main content -->
+            <div class="content-wrapper">
+                <!-- Content area -->
+                <div class="content">
+                    <!-- PÁGINAS DINÁMICAS -->
+                    @RenderBody()
+                    <!-- Footer -->
+                    @Html.Partial("_Footer")
+                    <!-- /footer -->
+                </div>
+                <!-- /content area -->
+            </div>
+            <!-- /main content -->
+        </div>
+        <!-- /page content -->
+    </div>
+    <!-- /page container -->
+</body>
+</html>
+
+@helper OpcionHijos(IEnumerable<Beans.SEG_MenuBean> opciones, int level = 1)
+{
+    foreach (var opcion in opciones)
+    {
+        var opcionHijos = opcion.MenuHijos;
+
+<li>
+    @if (opcion.tip_menu != "")
+    {
+        <a href="@opcion.navegacion_url"><i class="@opcion.icono"></i> <span>@opcion.nom_menu</span></a>
+    }
+    else
+    {
+        <a href="@Url.Action(opcion.action, opcion.controller)?idx=@Session["session"].ToString()"><i class="@opcion.icono"></i> <span>@opcion.nom_menu</span></a>
+    }
+
+    @if (opcionHijos.Count() > 0)
+    {
+        <ul>
+            @OpcionHijos(opcionHijos, level + 1)
+        </ul>
+    }
+</li>
+    }
+}
+
+@RenderSection("scripts", required: false)
+@MiniProfiler.RenderIncludes()
+
+<style>
+    #overlay2 {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba( 255, 255, 255, .8 ) url('http://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat;
+    }
+
+</style>
+
+<script>
+    $(document).ready(function () {
+        $("#slide").click();
+
+        // Create overlay and append to body:
+        $('<div id="overlay"/>').css({
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: $(window).height() + 'px',
+            opacity: 0.4,
+            background: 'lightgray url(@Url.Content("~/assets/images/loader.gif")) no-repeat center'
+        }).hide().appendTo('body');
+
+        // Create overlay and append to body:
+        $('<div id="overlay2"/>').hide().appendTo('body');
+    });
+    @*var FechaSistema = '@((Session["Fecha"] as DateTime?).Value.ToString("dd/MM/yyyy"))';*@
+
+    var urls = {
+        SEGApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/SEG',
+            ConsultaUsuario: function () { return format('{}/{}', this.RoutePrefix, 'ConsultaUsuario') },
+            GetUsuariosPorNombre: function (term) { return format('{}/{}/{}', this.RoutePrefix, 'GetUsuariosPorNombre', term) },
+            GetUsuariosCorreoPorNombre: function (term) { return format('{}/{}/{}', this.RoutePrefix, 'GetUsuariosCorreoPorNombre', term) },
+            GetDataTable_Correo: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Correo') },
+        },
+        BALApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/BAL',
+            GetDataTable_Codificacion: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Codificacion') },
+            GetDataTable_Plantilla: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Plantilla') },
+            GetDataTable_Batch: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Batch') }
+        },
+        KOPApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/KOP',
+            ConsultaCierre: function () { return format('{}/{}', this.RoutePrefix, 'ConsultaCierre') },
+            GetDataTable_Indicador: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Indicador') },
+            //ws_RunXls: function (excel, cod_unidad_negocio, cod_carga_auxiliar, cod_frecuencia, cod_rango_fecha) { return format('{}/{}/{}/{}/{}/{}', this.RoutePrefix, 'ws_RunXls', excel, cod_unidad_negocio, cod_carga_auxiliar,cod_frecuencia,cod_rango_fecha) },
+        },
+        KCSApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/KCS',
+            GetDataTable_Ceco: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Ceco') },
+            GetDataTable_Clase: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Clase') },
+            GetDataTable_Partida: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Partida') },
+            GetMaterialesPorNombre: function () { return format('{}/{}', this.RoutePrefix, 'GetMaterialesPorNombre') },
+            GetDataTable_Indicador: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Indicador') },
+        },
+        MINApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/MIN',
+            GetDataTable_Estructura: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Estructura') },
+            GetDataTable_Tajo: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Tajo') }
+        },
+        APPApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/APP',
+            GetDataTable_Plantilla: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Plantilla') },
+            GetDataTable_RepXLS: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_RepXLS') },
+            GetDataTable_Publicacion: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Publicacion') }
+        },
+        CPXApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/CPX',
+            GetDataTable_Maestra: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Maestra') }
+        },
+        OXApi: {
+            RoutePrefix: '@Url.Content("~")'+'api/OX',
+            GetDataTable_Movimiento: function () { return format('{}/{}', this.RoutePrefix, 'GetDataTable_Movimiento') }
+        }
+    }
+
+    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+    $(function () {
+        $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+    })
+
+    // load a format
+    numeral.register('format', 'percentage', {
+        regexps: {
+            format: /(%)/,
+            unformat: /(%)/
+        },
+        format: function (value, format, roundingFunction) {
+            var space = numeral._.includes(format, ' %') ? ' ' : '',
+                output;
+
+            value = value * 100;
+
+            // check for space before %
+            format = format.replace(/\s?\%/, '');
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            if (numeral._.includes(output, ')')) {
+                output = output.split('');
+
+                output.splice(-1, 0, space + '%');
+
+                output = output.join('');
+            } else {
+                output = output + space + '%';
+            }
+
+            return output;
+        },
+        unformat: function (string) {
+            return numeral._.stringToNumber(string) * 0.01;
+        }
+    });
+</script>

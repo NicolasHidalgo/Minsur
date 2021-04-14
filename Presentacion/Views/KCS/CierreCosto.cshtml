@@ -1,0 +1,305 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "CierreCosto";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+<script src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<!-- /theme JS files -->
+<!-- Basic modal -->
+<div id="modal_default" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnCerrar">Cerrar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Cierre Costos</a></li>
+            </ul>
+            @*<ul class="breadcrumb-elements">
+                <li><a id="btnConsultaCierre"><i class="icon-database-refresh"></i> Consulta de Cierres</a></li>
+            </ul>*@
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Vertical form options -->
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Basic layout-->
+                <form id="FormCierre">
+                    <div class="panel panel-flat">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>Unidad:</label>
+                                @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                            </div>
+                            <div class="form-group">
+                                <label>Frecuencia:</label>
+                                @Html.DropDownList("ddlFrecuencia", Model.ddlFrecuencia, new { @data_placeholder = "Frecuencias", @class = "select" })
+                            </div>
+                            <div class="form-group">
+                                <label>Estado:</label>
+                                @Html.TextBox("txtEstado", Model.estado, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+
+                            <div class="form-row">
+                                <div id="divMes" class="form-group col-xs-3 col-sm-3">
+                                    <label>Mes:</label>
+                                    @Html.TextBox("txtCodMes_txt", Model.cod_mes_txt, new { @class = "form-control", @readonly = "readonly" })
+                                    @Html.TextBox("txtCodMes", Model.cod_mes, new { @class = "form-control hidden", @readonly = "readonly" })
+                                </div>
+
+                                <div id="divSemana" class="form-group col-xs-3 col-sm-3">
+                                    <label>Semana:</label>
+                                    @Html.TextBox("txtCodRangoFecha_txt", Model.cod_rango_fecha_txt, new { @class = "form-control", @readonly = "readonly" })
+                                    @Html.TextBox("txtCodRangoFecha", Model.cod_rango_fecha, new { @class = "form-control hidden", @readonly = "readonly"})
+                                </div>
+
+                                <div id="divDel" class="form-group col-xs-3 col-sm-3">
+                                    <label>Del:</label>
+                                    @Html.TextBox("txtFechaDesde", Model.fec_desde_txt, new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+
+                                <div id="divAl" class="form-group col-xs-3 col-sm-3">
+                                    <label>Al:</label>
+                                    @Html.TextBox("txtFechaHasta", Model.fec_hasta_txt, new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <a id="btnCerrarModal" class="btn btn-primary">Cerrar Período</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- /basic layout -->
+            </div>
+        </div>
+        <!-- /vertical form options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+$(function () {
+    var selectedFrecuencia = $('#ddlFrecuencia').val();
+    var selectedUnidad = $('#ddlUnidad').val();
+
+    if (selectedFrecuencia == "M") {
+        $("#divSemana").hide();
+        $("#divMes").removeClass().addClass("form-group col-xs-3 col-sm-4");
+        $("#divDel").removeClass().addClass("form-group col-xs-3 col-sm-4");
+        $("#divAl").removeClass().addClass("form-group col-xs-3 col-sm-4");
+    }
+    if (selectedFrecuencia == "S") {
+        $("#divSemana").show();
+        $("#divMes").removeClass().addClass("form-group col-xs-3 col-sm-3");
+        $("#divSemana").removeClass().addClass("form-group col-xs-3 col-sm-3");
+        $("#divDel").removeClass().addClass("form-group col-xs-3 col-sm-3");
+        $("#divAl").removeClass().addClass("form-group col-xs-3 col-sm-3");
+    }
+
+    $('#ddlUnidad').change(function () {
+        var selectedUnidad = $(this).val();
+        if (selectedUnidad != null && selectedUnidad != '') {
+            $.getJSON('@Url.Action("JSON_GetFrecuenciasPorUnidad")', { cod_unidad_negocio: selectedUnidad }, function (data) {
+                var frecuenciasSelect = $('#ddlFrecuencia');
+                frecuenciasSelect.empty();
+                var i = 0;
+                $.each(data.ddlFrecuencia, function (index, item) {
+                    i += 1;
+                    frecuenciasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                $("#txtEstado").val(data.estado);
+                $("#txtCodMes").val(data.cod_mes);
+                $("#txtCodMes_txt").val(data.cod_mes_txt);
+                $("#txtCodRangoFecha").val(data.cod_rango_fecha);
+                $("#txtCodRangoFecha_txt").val(data.cod_rango_fecha_txt);
+                $("#txtFechaDesde").val(data.fec_desde_txt);
+                $("#txtFechaHasta").val(data.fec_hasta_txt);
+            });
+        }
+    });
+
+    $('#ddlFrecuencia').change(function () {
+        selectedUnidad = $('#ddlUnidad').val();
+        selectedFrecuencia = $('#ddlFrecuencia').val();
+
+        if (selectedFrecuencia == "M") {
+            $("#divSemana").hide();
+            $("#divMes").removeClass().addClass("form-group col-xs-3 col-sm-4");
+            $("#divDel").removeClass().addClass("form-group col-xs-3 col-sm-4");
+            $("#divAl").removeClass().addClass("form-group col-xs-3 col-sm-4");
+        }
+        if (selectedFrecuencia == "S") {
+            $("#divSemana").show();
+            $("#divMes").removeClass().addClass("form-group col-xs-3 col-sm-3");
+            $("#divSemana").removeClass().addClass("form-group col-xs-3 col-sm-3");
+            $("#divDel").removeClass().addClass("form-group col-xs-3 col-sm-3");
+            $("#divAl").removeClass().addClass("form-group col-xs-3 col-sm-3");
+        }
+
+        if (selectedUnidad != null && selectedUnidad != '' && selectedFrecuencia != null && selectedFrecuencia != '') {
+            $.getJSON('@Url.Action("JSON_GetAprobacion")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, accion: 'PANEL_CERRAR2' }, function (data) {
+                $("#txtEstado").val(data.estado);
+                $("#txtCodMes").val(data.cod_mes);
+                $("#txtCodMes_txt").val(data.cod_mes_txt);
+                $("#txtCodRangoFecha").val(data.cod_rango_fecha);
+                $("#txtCodRangoFecha_txt").val(data.cod_rango_fecha_txt);
+                $("#txtFechaDesde").val(data.fec_desde_txt);
+                $("#txtFechaHasta").val(data.fec_hasta_txt);    
+            });
+        }
+    });
+
+    $("#btnCerrar").on("click", function () {
+        $("#overlay").show();
+        $('#modal_default').modal('toggle');
+        var _aprobacion = {
+            cod_mes: $("#txtCodMes").val(),
+            cod_rango_fecha: $("#txtCodRangoFecha").val(),
+            cod_frecuencia: $("#ddlFrecuencia option:selected").val(),
+            cod_unidad_negocio: $("#ddlUnidad option:selected").val()
+        };
+
+        var _url = '@Url.Action("CierreCosto", "KCS")';
+
+        $.post(_url, _aprobacion).done(function (data) {
+            if (data.Status === 200) {
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                toastr.success(data.Message);
+
+                selectedFrecuencia = $('#ddlFrecuencia').val();
+                selectedUnidad = $('#ddlUnidad').val();
+                if (selectedUnidad != null && selectedUnidad != '' && selectedFrecuencia != null && selectedFrecuencia != '') {
+                    $.getJSON('@Url.Action("JSON_GetAprobacion")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, accion: 'PANEL_CERRAR2'  }, function (data) {
+                        $("#txtEstado").val(data.estado);
+                        $("#txtCodMes").val(data.cod_mes);
+                        $("#txtCodMes_txt").val(data.cod_mes_txt);
+                        $("#txtCodRangoFecha").val(data.cod_rango_fecha);
+                        $("#txtCodRangoFecha_txt").val(data.cod_rango_fecha_txt);
+                        $("#txtFechaDesde").val(data.fec_desde_txt);
+                        $("#txtFechaHasta").val(data.fec_hasta_txt);
+                    });
+                }
+            } else if (data.Status === 400) {
+                $("#overlay").hide();
+                toastr.warning(data.Message).css("width", "500px");
+            } else {
+                $("#overlay").hide();
+                toastr.error(data.Message).css("width", "500px");
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            $("#overlay").hide();
+            toastr.warning(err).css("width", "500px");
+        });
+    });
+
+});
+
+$(document).on("click", "#btnCerrarModal", function () {
+    var mes = $("#txtCodMes_txt").val();
+    var semana = $("#txtCodRangoFecha_txt").val();
+    var unidad = $("#ddlUnidad option:selected").text();
+    var frecuencia = $("#ddlFrecuencia option:selected").val();
+
+    if (mes == "" || mes == null) {
+        document.getElementById('pComentario').innerHTML = 'No hay un período que cerrar';
+        $("#btnCerrar").hide();
+    }
+    else {
+        if (frecuencia == "M")
+            document.getElementById('pComentario').innerHTML = 'Esta seguro que desea cerrar el mes ' + mes + '  de la unidad ' + unidad;
+
+        if (frecuencia == "S")
+            document.getElementById('pComentario').innerHTML = 'Esta seguro que desea cerrar la semana ' + semana  + ' del mes ' + mes + '  de la unidad ' + unidad;
+        
+        $("#btnCerrar").show();
+    }
+    $('#modal_default').modal('show');
+});
+
+
+@*$('#btnConsultaCierre').on('click', function () {
+    var frec = $('#ddlFrecuencia').val();
+    var un = $('#ddlUnidad').val();
+    var baseUrl = "@Url.Action("ConsultaCierre", "KOP")?idx=@Session.SessionID&cod_unidad_negocio="+un+"&cod_frecuencia="+frec;
+    window.location.href=baseUrl;
+});*@
+
+
+    </script>
+}

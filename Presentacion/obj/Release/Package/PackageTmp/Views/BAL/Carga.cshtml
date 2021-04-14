@@ -1,0 +1,416 @@
+﻿
+@{
+    ViewBag.Title = "Carga";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/plugins/purify.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/plugins/sortable.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/fileinput.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/uploader_bootstrap.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+<!-- /theme JS files -->
+<!-- Basic modal -->
+@*<div id="modal_default" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h6 class="text-semibold">Confirmar</h6>
+                    <p id="pComentario"></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link" data-dismiss="modal" id="BtnCancelar">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="BtnAceptar">Aceptar</button>
+                    <label id="lblId" class="hidden"></label>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<!-- /basic modal -->
+<!-- Modal Largo -->
+<div id="modal_default" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+            <div class="panel panel-flat">
+                <table id="BAL_BatchDataTable" class="table table-responsive table-bordered table-striped"></table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal" id="BtnCancelar">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="BtnAceptar">Aceptar</button>
+                <label id="lblId" class="hidden"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Largo -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Carga Excel del Balance Metalúrgico</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Bootstrap file input -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <p id="pPanel" class="content-group">Proceso que permite cargar el contenido de una hoja excel al sistema. Debe respetarse el formato acorde con la configuración de la plantilla y la hoja de contenido debe llamarse <code> BD BalMet</code></p>
+                <form id="FormUpload" class="form-horizontal" enctype="multipart/form-data">
+                    <label id="lblNomenclatura" class="hidden"></label>
+                    <label id="lblArchivoFisico" class="hidden"></label>
+                    <label id="lblArchivoLogico" class="hidden"></label>
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label text-semibold">Archivo Excel:</label>
+                        <div class="col-lg-10">
+                            <input type="file" name="file" id="txtUploadFile" class="file-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label text-semibold">Fecha Informe:</label>
+                        <div class="col-lg-5">
+                            <div class="input-group date col-md-6">
+                                <input type="text" class="form-control" id="dpFecInforme" value="@ViewBag.fecha" readonly />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 hidden">
+                            <label class="col-lg-2 control-label text-semibold">Al:</label>
+                            <div class="input-group date col-md-6">
+                                <input type="text" class="form-control" id="dpFecInformeHasta" value="@ViewBag.fecha" readonly />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="divAlert" class="alert alert-danger alert-styled-left alert-bordered hidden"></div>
+            </div>
+        </div>
+        <!-- /basic layout -->
+        <!-- /vertical form options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+    $('#dpFecInforme').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+    $('#dpFecInformeHasta').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+</script>
+
+@section Styles{
+    <style>
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts {
+<script>
+$(function () {
+    var BAL_BatchDataTable;
+
+    var FormUpload = $('#FormUpload').validate({
+        submitHandler: function (form, e) {
+            $("#overlay").show();
+            $("#FormUpload").hide();
+            $("#divAlert").empty();
+            $("#divAlert").addClass("hidden");
+            $("#pPanel").text('Procesando información...');
+            var fecInforme = $("#dpFecInforme").datepicker('getDate').val();
+            var fecInformeHasta = $("#dpFecInformeHasta").datepicker('getDate').val();
+
+            var files = document.getElementById('txtUploadFile').files;
+            if (files.length > 0) {
+               if (window.FormData !== undefined) {
+                   var dataForm = new FormData();
+                   for (var x = 0; x < files.length; x++){
+                       dataForm.append("file" + x, files[x]);
+                   }
+                   $.ajax({
+                       type: "POST",
+                       url: '@Url.Content("~")' + 'BAL/UploadFileAjax?accion=CARGA&fec_informe=' + fecInforme + '&fec_informe_hasta=' + fecInformeHasta,
+                       contentType: false,
+                       processData: false,
+                       data: dataForm,
+                       success: function(data) {
+                           if (data.Status === 200) {
+                               $("#overlay").hide();
+                               toastr.success(data.Message);
+                               $("#pPanel").text('Proceso Concluido');
+                           } else if (data.Status === 400) {
+                               if (data.Kind == "WARNING") {
+                                   $("#overlay").hide();
+                                   $('#modal_default').modal('toggle');
+                                   $("#pComentario").text(data.Message);
+                                   $("#lblId").text(data.Id);
+                                   $("#lblNomenclatura").text(data.Aux);
+                                   $("#lblArchivoFisico").text(data.Aux2);
+                                   $("#lblArchivoLogico").text(data.Aux3);
+
+                                   var _fecInforme = $("#dpFecInforme").datepicker('getDate').val();
+                                   var _fecInformeHasta = $("#dpFecInformeHasta").datepicker('getDate').val();
+
+                                   BAL_BatchDataTable = $('#BAL_BatchDataTable').DataTable({
+                                       autoWidth: false,
+                                       responsive: true,
+                                       searching: false,
+                                       ordering: false,
+                                       processing: true,
+                                       serverSide: true,
+                                       stateSave: false,
+                                       lengthChange: false,
+                                       info: false,
+                                       paging: false,
+                                       scrollY: "500px",
+                                       scrollCollapse: true,
+
+                                       ajax: {
+                                           url: urls.BALApi.GetDataTable_Batch(),
+                                           type: 'GET',
+                                           data: function (data) {
+                                               var _filter = {
+                                                   search: $('#global_filter').val(),
+                                                   cod_unidad_negocio: $('#lblCodUnidadNegocio').text(),
+                                                   cod_usuario: $('#lblCodUsuario').text(),
+                                                   archivo_fisico: $("#lblArchivoFisico").text(),
+                                                   archivo_logico: $("#lblArchivoLogico").text(),
+                                                   ide_carga: 0,
+                                                   fec_informe: _fecInforme,
+                                                   fec_informe_hasta: _fecInformeHasta
+                                               };
+
+                                               var _order = $.map(data.order, function (item) {
+                                                   return {
+                                                       Property: data.columns[item.column].name,
+                                                       Direction: item.dir
+                                                   };
+                                               });
+
+                                               delete data.columns;
+                                               delete data.order;
+                                               delete data.search;
+
+                                               data.filter = _filter;
+                                               data.orderby = _order;
+                                           }
+                                       },
+                                       columns: [
+                                           //{
+                                           //    title: '#',
+                                           //    data: 'ide_carga',
+                                           //    name: 'ide_carga',
+                                           //    className: 'ide_carga'
+                                           //},
+                                           {
+                                               title: 'Fecha',
+                                               data: 'fecha',
+                                               name: 'fecha',
+                                               render: function (data, tye, full, meta) {
+                                                   if (data != null) {
+                                                       return moment(data).format('DD/MM/YYYY');
+                                                   }
+                                                   return '-';
+                                               },
+                                               className: 'fecha text-center',
+                                           },
+                                           {
+                                               title: 'Batch',
+                                               data: 'batch',
+                                               name: 'batch',
+                                               className: 'batch text-center'
+                                           },
+                                           {
+                                               title: 'Cama',
+                                               data: 'cama',
+                                               name: 'cama',
+                                               className: 'cama text-center'
+                                           },
+                                           {
+                                               title: 'Lanza',
+                                               data: 'lanza',
+                                               name: 'lanza',
+                                               className: 'lanza text-center'
+                                           },
+                                           {
+                                               title: "&nbsp;",
+                                               data: "marca",
+                                               render: function (data, type, full, meta) {
+                                                   if (data == 1) {
+                                                       return '<input type="checkbox" checked="checked">';
+                                                   } else {
+                                                       return '<input type="checkbox">';
+                                                   }
+                                               },
+                                               className: "marca text-center"
+                                           }
+                                       ],
+
+                                   });
+
+                               } else {
+                                   $("#overlay").hide();
+                                   $("#divAlert").removeClass("hidden");
+                                   $("#divAlert").text('');
+                                   $("#divAlert").append('<button type="button" class="close" data-dismiss="alert"><span>&times;</span><span class="sr-only">Close</span></button>' + data.Message);
+                                   $("#pPanel").text('Procesando concluido con errores');
+                                   $("#FormUpload").show();
+                               }
+                           } else {
+                               $("#overlay").hide();
+                               $("#divAlert").removeClass("hidden");
+                               $("#divAlert").text('');
+                               $("#divAlert").append('<button type="button" class="close" data-dismiss="alert"><span>&times;</span><span class="sr-only">Close</span></button>' + data.Message);
+                               //$("#FormUpload").show();
+                           }
+                       },
+                       error: function (xhr, status, p3, p4){
+                           var err = "Error " + " " + status + " " + p3 + " " + p4;
+                           if (xhr.responseText && xhr.responseText[0] == "{")
+                               err = JSON.parse(xhr.responseText).Message;
+                               console.log(err);
+                       }
+                   });
+               } else {
+                    alert("This browser doesn't support HTML5 file uploads!");
+               }
+            }
+        }
+    });
+
+    $("#BtnAceptar").on("click", function () {
+        $("#overlay").show();
+        $('#modal_default').modal('toggle');
+        $("#BtnAceptar").prop("disabled", true);
+        $("#BtnCancelar").prop("disabled", true);
+        $("#pComentario").text("Procesando...");
+        //$("#BAL_BatchDataTable").hide();
+
+        var _ide_carga = $("#lblId").text();
+        var _nomenclatura = $("#lblNomenclatura").text();
+        var _fecInforme = $("#dpFecInforme").datepicker('getDate').val();
+        var _fecInformeHasta = $("#dpFecInformeHasta").datepicker('getDate').val();
+        var _archivoFisico = $("#lblArchivoFisico").text();
+        var _archivoLogico = $("#lblArchivoLogico").text();
+
+        //Filtra los cambios
+        var newArray = [];
+        $('#BAL_BatchDataTable > tbody  > tr').each(function (i, row) {
+            if ($(row).find('input:checked').val() != null) {
+                newArray.push({
+                    fecha: $(row).find('td.fecha').text(),
+                    batch: $(row).find('td.batch').text(),
+                    cama: $(row).find('td.cama').text(),
+                    lanza: $(row).find('td.lanza').text(),
+                    marca: $(row).find('input:checked').val()
+                });
+            }
+        });
+
+        $.post('@Url.Action("UpdateMarca")', { accion: 'START_MARCA', ide_carga: _ide_carga, archivo_fisico: _archivoFisico, archivo_logico: _archivoLogico, fec_informe: _fecInforme, dataListFromTable: newArray }, function (data) {
+            if (data.Status === 200) {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+
+                $.post('@Url.Action("ProcesarFileAjax")', { accion: 'DETALLE', ide_carga: _ide_carga, nomenclatura: _nomenclatura, fec_informe: _fecInforme, fec_informe_hasta: _fecInformeHasta }, function (data) {
+                    if (data.Status === 200) {
+                        $("#BtnAceptar").prop("disabled", false);
+                        $("#BtnCancelar").prop("disabled", false);
+                        $("#pComentario").text("");
+                        //$('#modal_default').modal('toggle');
+                        $("#overlay").hide();
+                        $("#pPanel").text('Proceso Concluido');
+                        toastr.success(data.Message);
+                    } else if (data.Status === 400) {
+                        $("#BtnAceptar").prop("disabled", false);
+                        $("#BtnCancelar").prop("disabled", false);
+                        $("#pComentario").text("");
+                        //$('#modal_default').modal('toggle');
+                        $("#overlay").hide();
+                        toastr.error(data.Message);
+                    } else {
+                        $("#BtnAceptar").prop("disabled", false);
+                        $("#BtnCancelar").prop("disabled", false);
+                        $("#pComentario").text("");
+                        //$('#modal_default').modal('toggle');
+                        $("#overlay").hide();
+                        toastr.warning(data.Message);
+                    }
+                });
+
+            } else if (data.Status === 400) {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                toastr.error(data.Message);
+            } else {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                toastr.warning(data.Message);
+            }
+        });
+
+    });
+
+
+
+});
+
+    </script>
+}

@@ -1,0 +1,824 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Ceco";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar por Codigo Ceco</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormCeco">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="txtCeco" class="col-form-label">CeCo</label>
+                            <input type="text" class="form-control" id="txtCeco" name="txtCeco">
+                        </div>
+                        <div class="form-group col-md-9">
+                            <label for="txtCecoDetallado" class="col-form-label">Ceco Detallado</label>
+                            <input type="text" class="form-control" id="txtCecoDetallado" name="txtCecoDetallado">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlNivel1" class="col-form-label">Nivel 1</label>
+                            @Html.DropDownList("ddlNivel1", Model.ddlNivel1, "", new { @data_placeholder = "Nivel 1", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlNivel2" class="col-form-label">Nivel 2</label>
+                            @Html.DropDownList("ddlNivel2", Model.ddlNivel2, "", new { @data_placeholder = "Nivel 2", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlNivel3" class="col-form-label">Nivel 3</label>
+                            @Html.DropDownList("ddlNivel3", Model.ddlNivel3, "", new { @data_placeholder = "Nivel 3", @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label for="txtUbicacion" class="col-form-label">Ubicacion</label>
+                            <input type="text" class="form-control" id="txtUbicacion" name="txtUbicacion">
+                        </div>
+                        <div class="form-group col-md-10">
+                            <label for="ddlGrupoMant" class="col-form-label">Grupo Mant.</label>
+                            <select class="form-control" name="ddlGrupoMant" id="ddlGrupoMant"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCecoOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Configuracion de Centro Costo</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                @*<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            @*<div class="panel-heading">
+                    <h5 class="panel-title">Basic datatable</h5>
+                    <div class="heading-elements">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse"></a></li>
+                            <li><a data-action="reload"></a></li>
+                            <li><a data-action="close"></a></li>
+                        </ul>
+                    </div>
+                </div>*@
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="ddlUnidadFilter" class="col-form-label">Unidad</label>
+                        @Html.DropDownList("ddlUnidadFilter", Model.ddlUnidad, new { @data_placeholder = "Periodos", @class = "form-control" })
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label for="ddlPeriodoFilter" class="col-form-label">Periodo</label>
+                        @Html.DropDownList("ddlPeriodoFilter", Model.Periodos, new { @data_placeholder = "Periodos", @class = "form-control" })
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="ddlNivel1Filter" class="col-form-label">Nivel 1</label>
+                        @Html.DropDownList("ddlNivel1Filter", Model.ddlNivel1, "", new { @data_placeholder = "Nivel 1" })
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="ddlNivel2Filter" class="col-form-label">Nivel 2</label>
+                        @Html.DropDownList("ddlNivel2Filter", Model.ddlNivel2, "", new { @data_placeholder = "Nivel 2" })
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="ddlNivel3Filter" class="col-form-label">Nivel 3</label>
+                        @Html.DropDownList("ddlNivel3Filter", Model.ddlNivel3, "", new { @data_placeholder = "Nivel 3" })
+                    </div>
+                </div>
+            </div>
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+$(function () {
+
+    $('#ddlUnidadFilter,#ddlPeriodoFilter').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    $('#ddlNivel1Filter,#ddlNivel1,#ddlNivel2Filter,#ddlNivel2,#ddlNivel3Filter,#ddlNivel3,#ddlGrupoMant').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.KCSApi.GetDataTable_Ceco(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                    cod_usuario: $('#lblCodUsuario').text(),
+                    periodo: $('#ddlPeriodoFilter option:selected').val(),
+                    nivel1: $('#ddlNivel1Filter option:selected').val(),
+                    nivel2: $('#ddlNivel2Filter option:selected').val(),
+                    nivel3: $('#ddlNivel3Filter option:selected').val()
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'CeCo',
+            data: 'cod_centro_costo',
+            name: 'cod_centro_costo',
+            className: 'cod_centro_costo',
+            responsivePriority: 1,
+            width: '5%'
+        },
+        {
+            title: 'Ceco Detallado',
+            data: 'ceco_detallado',
+            name: 'ceco_detallado',
+            className: 'ceco_detallado',
+            width: '20%'
+        },
+        {
+            title: 'Nivel 1',
+            data: 'nivel1',
+            name: 'nivel1',
+            className: 'nivel1',
+            width: '10%'
+        },
+        {
+            title: 'Nivel 2',
+            data: 'nivel2',
+            name: 'nivel2',
+            className: 'nivel2',
+            width: '15%'
+        },
+        {
+            title: 'Nivel 3',
+            data: 'nivel3',
+            name: 'nivel3',
+            className: 'nivel3',
+            width: '15%'
+        },
+        {
+            title: 'Cod GC',
+            data: 'cod_grupo_costo',
+            name: 'cod_grupo_costo',
+            className: 'cod_grupo_costo text-center',
+            width: '5%'
+        },
+        {
+            title: 'Ubicacion',
+            data: 'ubicacion',
+            name: 'ubicacion',
+            className: 'ubicacion text-center',
+            width: '5%'
+        },
+        {
+            title: 'Grupo Mant.',
+            data: 'des_grupo_mantenimiento',
+            name: 'des_grupo_mantenimiento',
+            className: 'des_grupo_mantenimiento',
+            width: '10%'
+        },
+        {
+            title: 'Cod GM',
+            data: 'cod_grupo_mantenimiento',
+            name: 'cod_grupo_mantenimiento',
+            className: 'cod_grupo_mantenimiento',
+            width: '5%'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.cod_centro_costo + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_centro_costo + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+
+    $('#ddlUnidadFilter').on('change', function () {
+        if ($('#ddlUnidadFilter').val() == null || $('#ddlUnidadFilter').val() == "") {
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: 0, nivel: '' }, function (data) {
+            $('#ddlPeriodoFilter,#ddlNivel1Filter,#ddlNivel2Filter,#ddlNivel3Filter').empty();
+            var select = $('#ddlPeriodoFilter');
+            select.empty();
+            var i = 0;
+
+            if (data.ddlPeriodo.length == 0) {
+                $('#ddlNivel1Filter').empty();
+                $('#ddlNivel2Filter').empty();
+                $('#ddlNivel3Filter').empty();
+                $("#overlay").hide();
+                return;
+            }
+
+            $.each(data.ddlPeriodo, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlPeriodo.length) {
+                    select = $('#ddlNivel1Filter');
+                    select.empty();
+                    i = 0;
+
+                    if (data.ddlNivel1.length == 0) {
+                        $('#ddlNivel2Filter').empty();
+                        $('#ddlNivel3Filter').empty();
+                        $("#overlay").hide();
+                        return;
+                    }
+
+                    $.each(data.ddlNivel1, function (index, item) {
+                        i += 1;
+                        select.append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text,
+                            selected: item.Selected
+                        }));
+
+                        if (i == data.ddlNivel1.length) {
+                            $("#ddlNivel1Filter").val("");
+                            $("#overlay").hide();
+                            PlantillaDataTable.draw();
+                            return;
+                        }
+                    })
+                }
+            });
+
+            var selectMant = $('#ddlGrupoMant');
+            selectMant.empty();
+            var i = 0;
+            $.each(data.ddlGrupo, function (index, item) {
+                i += 1;
+                selectMant.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+        });
+    });
+
+    $('#ddlPeriodoFilter').on('change', function () {
+        if ($('#ddlPeriodoFilter').val() == null || $('#ddlPeriodoFilter').val() == "") {
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: '' }, function (data) {
+            $('#ddlNivel1Filter,#ddlNivel2Filter,#ddlNivel3Filter').empty();
+            var select = $('#ddlNivel1Filter');
+            select.empty();
+            var i = 0;
+
+            if (data.ddlNivel1.length == 0) {
+                $('#ddlNivel2Filter').empty();
+                $('#ddlNivel3Filter').empty();
+                $("#overlay").hide();
+                return;
+            }
+
+            $.each(data.ddlNivel1, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlNivel1.length) {
+                    $("#ddlNivel1Filter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlNivel1Filter').on('change', function () {
+        if ($('#ddlNivel1Filter').val() == null || $('#ddlNivel1Filter').val() == "") {
+            $('#ddlNivel2Filter,#ddlNivel3Filter').empty();
+            PlantillaDataTable.draw();
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: $('#ddlNivel1Filter').val() }, function (data) {
+            $('#ddlNivel2Filter,#ddlNivel3Filter').empty();
+            var select = $('#ddlNivel2Filter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlNivel2, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlNivel2.length) {
+                    $("#ddlNivel2Filter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlNivel1').on('change', function () {
+        if ($('#ddlNivel1').val() == null || $('#ddlNivel1').val() == "") {
+            $('#ddlNivel2,#ddlNivel3').empty();
+            return;
+        }
+
+        $("#overlay2").show();
+        $("#overlay2").appendTo('#RegistroModal');
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: $('#ddlNivel1 option:selected').val() }, function (data) {
+            $('#ddlNivel2,#ddlNivel3').empty();
+            var select = $('#ddlNivel2');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlNivel2, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlNivel2.length) {
+                    $("#ddlNivel2").val("");
+                    $("#overlay2").hide();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlNivel2Filter').on('change', function () {
+        if ($('#ddlNivel2Filter').val() == null || $('#ddlNivel2Filter').val() == ""){
+            $('#ddlNivel3Filter').empty();
+            PlantillaDataTable.draw();
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: $('#ddlNivel2Filter').val() }, function (data) {
+            var select = $('#ddlNivel3Filter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlNivel3, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlNivel3.length) {
+                    $("#ddlNivel3Filter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlNivel2').on('change', function () {
+        if ($('#ddlNivel2').val() == null || $('#ddlNivel2').val() == "") {
+            $('#ddlNivel3').empty();
+            return;
+        }
+        $("#overlay2").show();
+        $("#overlay2").appendTo('#RegistroModal');
+        $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: $('#ddlNivel2 option:selected').val() }, function (data) {
+            $('#ddlNivel3').empty();
+            var select = $('#ddlNivel3');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlNivel3, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlNivel3.length) {
+                    $("#ddlNivel3").val("");
+                    $("#overlay2").hide();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlNivel3Filter').on('change', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+
+
+     var codValidator = $('#FormCeco').validate({
+        rules: {
+            txtCeco: {
+                required: true
+            },
+            txtCecoDetallado: {
+                required: true
+            },
+            ddlNivel1: {
+                required: true
+            },
+            ddlNivel2: {
+                required: true
+            },
+            ddlNivel3: {
+                required: true
+            },
+            txtUbicacion: {
+                required: true
+            },
+            //ddlGrupoMant: {
+            //    required: true
+            //}
+        },
+        messages: {
+            txtCeco: {
+                required: 'Ingrese Ceco'
+            },
+            txtCecoDetallado: {
+                required: 'Ingrese Ceco Detallado'
+            },
+            ddlNivel1: {
+                required: 'Seleccione Nivel 1'
+            },
+            ddlNivel2: {
+                required: 'Seleccione Nivel 2'
+            },
+            ddlNivel3: {
+                required: 'Seleccione Nivel 3'
+            },
+            txtUbicacion: {
+                required: 'Ingrese ubicacion'
+            },
+            //ddlGrupoMant: {
+            //    required: 'Seleccione Grupo Mant.'
+            //},
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            $('#RegistroModal').modal('toggle');
+            $("#overlay").show();
+
+            var _ceco = {
+                cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                periodo: $('#ddlPeriodoFilter option:selected').val(),
+                cod_centro_costo: $('#lblCecoOrigen').val(),
+                ceco_detallado: $('#txtCecoDetallado').val(),
+                cod_grupo_costo: $('#ddlNivel3 option:selected').val(),
+                cod_grupo_mantenimiento: $('#ddlGrupoMant option:selected').val(),
+                des_grupo_mantenimiento: $('#ddlGrupoMant option:selected').text(),
+                periodo: $('#ddlPeriodoFilter option:selected').val(),
+                ubicacion: $('#txtUbicacion').val(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Ceco", "KCS")';
+
+            $.post(_url, _ceco).done(function (data) {
+                $("#overlay").hide();
+                if (data.Status === 200) {
+                    toastr.success(data.Message);
+                    PlantillaDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+
+    $('#btnEliminar').on('click', function () {
+        $('#ConfirmarModal').modal('toggle');
+        $("#overlay").show();
+
+        var _ceco = {
+            cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+            periodo: $('#ddlPeriodoFilter option:selected').val(),
+            cod_centro_costo: $("#showid").val(),
+            accion: 'DELETE'
+        };
+
+        var _url = '@Url.Content("~")'+'KCS/Edit_Ceco'
+
+        $.post(_url, _ceco).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                toastr.success(data.Message);
+                PlantillaDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            $("#overlay").hide();
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var ide = $(this).data('id');
+        $("#showid").val(ide);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#RegistroModal').on('show.bs.modal', function (event) {
+        if (event.relatedTarget === undefined) return;
+        if (event.namespace === 'bs.modal') { // previene que el datepicker no limpie otros inputs
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            $(".validation-error-label").removeClass("validation-error-label");
+            $(".error").remove();
+
+            var action = button.data('whatever');
+            var titulo = "";
+
+            if (action == 'UPDATE') {
+                titulo = "ACTUALIZAR";
+                $("#txtCeco").val(button.closest("tr").find(".cod_centro_costo").text());
+                $("#txtCeco").prop('disabled', true);
+
+                $("#txtCecoDetallado").val(button.closest("tr").find(".ceco_detallado").text());
+                $("#txtCecoDetallado").prop('disabled', true);
+
+                $("#txtUbicacion").val(button.closest("tr").find(".ubicacion").text());
+
+                //$("#ddlNivel1,#ddlNivel2,#ddlNivel3").prop('disabled', true);
+
+                _nivel = button.closest("tr").find(".cod_grupo_costo").text();
+                $("#ddlGrupoMant").val(button.closest("tr").find(".cod_grupo_mantenimiento").text()).change();
+
+            } else {
+                titulo = "AGREGAR";
+            }
+
+            $.getJSON('@Url.Action("JSON_GetNivel")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter').val(), nivel: _nivel }, function (data) {
+                $('#ddlNivel1,#ddlNivel2,#ddlNivel3').empty();
+                var select = $('#ddlNivel1');
+                select.empty();
+                var i = 0;
+                $.each(data.ddlNivel1, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    if (i == data.ddlNivel1.length) {
+                        if (_nivel == "" || _nivel == "000000")
+                            $('#ddlNivel1').val("");
+
+                        select = $('#ddlNivel2');
+                        select.empty();
+                        i = 0;
+                        $.each(data.ddlNivel2, function (index, item) {
+                            i += 1;
+                            select.append($('<option/>', {
+                                value: item.Value,
+                                text: item.Text,
+                                selected: item.Selected
+                            }));
+
+                            if (i == data.ddlNivel2.length) {
+                                select = $('#ddlNivel3');
+                                select.empty();
+                                i = 0;
+                                $.each(data.ddlNivel3, function (index, item) {
+                                    i += 1;
+                                    select.append($('<option/>', {
+                                        value: item.Value,
+                                        text: item.Text,
+                                        selected: item.Selected
+                                    }));
+                                })
+                            }
+                        })
+                    }
+                });
+            });
+
+            $("#lblAccion").val(action);
+            $("#lblCecoOrigen").val($.trim(button.closest("tr").find(".cod_centro_costo").text()));
+            var modal = $(this)
+            modal.find('.modal-title').text(titulo)
+            //modal.find('.modal-body input').val(recipient)
+        }
+    });
+
+});
+
+    </script>
+}

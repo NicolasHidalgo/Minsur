@@ -1,0 +1,731 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Publicacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link href="~/Scripts/datepicker/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/datepicker/bootstrap-datepicker.es.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script src="~/Scripts/numeral/numeral.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+@*<div id="BuscarModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h6 class="text-semibold">Buscar:</h6>
+                    <div class="form-group">
+                        <input class="form-control " id="global_filter" placeholder="Buscar...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                @if (Model.est_aprobacion == 3)
+                {
+                    <p id="pComentario">Este período ya se encuentra publicado, desea continuar?</p>
+                }
+                else
+                {
+                    <p id="pComentario">Está seguro de publicar?</p>
+                }
+                
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnAceptar">Aceptar</button>
+                <label id="lblIdConfirm" />
+                <label id="lblParamConfirm" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" tabindex="-1" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel">AGREGAR COMENTARIOS</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    @*<div class="form-group">
+                        <label for="txtGlosa" class="col-form-label">Comentario Corporativo:</label>
+                        <textarea rows="10" class="form-control" id="txtGlosa"></textarea>
+                    </div>*@
+                    @*<div class="form-group">
+                        <label for="txtComentarioBra" class="col-form-label">Comentario BRASIL:</label>
+                        <textarea rows="6" class="form-control" id="txtComentarioBra"></textarea>
+                    </div>*@
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                @*<button id="btnGuardar" type="button" class="btn btn-primary">Guardar</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Publicacion</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                @*<li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <div class="form-row">
+                    <div class="form-group col-md-1 hidden">
+                        <label for="ddlTipoFilter" class="col-form-label">Tipo</label>
+                        @Html.DropDownList("ddlTipoFilter", Model.ddlTipo, new { @data_placeholder = "Tipo", @class = "select" })
+                    </div>
+
+                    <div class="form-group col-md-1 hidden">
+                        <label for="ddlFrecuenciaFilter" class="col-form-label">Frecuencia</label>
+                        @Html.DropDownList("ddlFrecuenciaFilter", Model.ddlFrecuencia, new { @data_placeholder = "Frecuencia", @class = "select" })
+                    </div>
+
+                    @*<div class="form-group col-md-1">
+            <label for="ddlPeriodoFilter" class="col-form-label">Periodo</label>
+            @Html.DropDownList("ddlPeriodoFilter", Model.Periodos, new { @data_placeholder = "Periodos", @class = "select" })
+        </div>
+
+        <div class="form-group col-md-1">
+            <label for="ddlMesFilter" class="col-form-label">Mes</label>
+            @Html.DropDownList("ddlMesFilter", Model.Meses, new { @data_placeholder = "Meses", @class = "select" })
+        </div>*@
+
+                    @*<div class="form-group col-md-3 hidden">
+            <label for="ddlFechaFilter" class="col-form-label">Fecha</label>
+            @Html.DropDownList("ddlFechaFilter", Model.Fechas, new { @data_placeholder = "Fechas", @class = "select" })
+        </div>*@
+                    <div class="form-group col-md-3">
+                        <label for="dpFecha" class="col-form-label">Fecha</label>
+                        <div class="input-group date">
+                            <input type="text" class="form-control" id="dpFecha" value="@ViewBag.fecha" readonly />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    @*<button type="button" id="btnRegistroModal" data-toggle="modal" data-target="#RegistroModal" data-param="COMENTARIOS" class="btn btn-default col-md-3"><i class="icon-stack-text"></i> Agregar comentarios</button>*@
+
+                    <div class="form-group col-md-9" style="margin-top:27px;">
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" id="btnPublicarModal" data-param="PUBLICAR_CON_CORREO" class="btn btn-default"><i class="icon-file-excel"></i> Publicar y Envio de Correo</button>
+                            <button type="button" id="btnPublicarModal" data-param="PUBLICAR_SIN_CORREO" class="btn btn-default"><i class="icon-printer2"></i> Publicar Sin Envio Correo</button>
+                            <button type="button" id="btnExportar" data-param="" class="btn btn-default"><i class="icon-file-excel"></i> Descargar Reporte</button>
+                            <button type="button" id="btnGuardar" data-param="" class="btn btn-default hidden"><i class="icon-stack-text"></i> Actualizar Comentarios</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <label for="txtGlosa" class="col-form-label">Comentario Corporativo:</label>
+                        <textarea rows="4" class="form-control" id="txtGlosa">@ViewBag.glosa</textarea>
+                        @*@Html.TextArea("txtGlosa", Model.glosa, new { @class = "form-control" })*@
+                    </div>
+                </div>
+
+            </div>
+            <table id="PublicacionDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+        
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+$(function () {
+    $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+})
+$(function () {
+
+    $('#dpFecha').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+
+    $('#ddlIndicador').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+
+    var PublicacionDataTable = $('#PublicacionDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+        pageLength: this.all,
+
+        ajax: {
+            url: urls.APPApi.GetDataTable_Publicacion(),
+            type: 'GET',
+            data: function (data) {
+
+                var fecha = $("#dpFecha").val();
+                var _CodRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_usuario: $('#lblCodUsuario').text(),
+                    cod_unidad_negocio: '',
+                    cod_frecuencia: $('#ddlFrecuenciaFilter').val(),
+                    cod_rango_fecha: _CodRangoFecha, //$('#ddlFechaFilter').val(),
+                    accion: 'SELECT',
+                    cod_modulo: $('#ddlTipoFilter').val(),
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Und. Negocio',
+            data: 'nom_unidad_negocio',
+            name: 'nom_unidad_negocio',
+            className: 'nom_unidad_negocio text-left',
+            width: '15%'
+        },
+        {
+            title: 'Frecuencia',
+            data: 'frecuencia',
+            name: 'frecuencia',
+            className: 'frecuencia text-center',
+            width: '10%'
+        },
+        {
+            title: 'Modulo',
+            data: 'cod_modulo',
+            name: 'cod_modulo',
+            className: 'cod_modulo text-center',
+            width: '10%',
+        },
+        {
+            title: 'Fecha Ult. Publicacion',
+            data: 'rango_fecha',
+            name: 'rango_fecha',
+            className: 'rango_fecha text-center',
+            width: '10%',
+        },
+        {
+            title: 'Estado Operativo',
+            data: 'estado_operativo',
+            name: 'estado_operativo',
+            className: 'estado text-center',
+            width: '20%',
+        },
+        //{
+        //    title: 'Fec. Actualizacion',
+        //    data: 'fec_actualizacion',
+        //    name: 'fec_actualizacion',
+        //    className: 'fec_actualizacion text-center',
+        //    width: '20%',
+        //    render: function (data, type, full, meta) {
+        //        if (data != null) {
+        //            return moment(data).format('DD/MM/YYYY');
+        //        }
+        //        return '-';
+        //    }
+        //},
+        {
+            title: 'Fec. Ultimo Cierre',
+            data: 'fec_ult_cierre',
+            name: 'fec_ult_cierre',
+            className: 'fec_ult_cierre text-center',
+            width: '15%',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return moment(data).format('DD/MM/YYYY');
+                }
+                return '-';
+            }
+        },
+
+        //{
+        //    title: 'Estado Publicacion',
+        //    data: 'estado_publicacion',
+        //    name: 'estado_publicacion',
+        //    className: 'estado text-center',
+        //    width: '20%',
+        //    render: function (data, type, full, meta) {
+        //        if (data == 'PUBLICADO')
+        //            return '<td><span class="label label-success">' + data + '</span></td>'
+        //        else if (data == 'SIN PUBLICAR')
+        //            return '<td><span class="label label-danger">' + data + '</span></td>'
+        //        return data;
+        //    },
+        //},
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PublicacionDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PublicacionDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PublicacionDataTable.draw();
+    });
+
+    //$('#ddlFechaFilter').on('change', function () {
+    //    PublicacionDataTable.draw();
+    //});
+    $('#dpFecha').on('change', function () {
+        var selectedUnidad = 'COR';
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedFrecuencia = $("#ddlFrecuenciaFilter").val();
+        var fecha = $("#dpFecha").val();
+        var _CodRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+        if (_CodRangoFecha != null && _CodRangoFecha != '') {
+            $.getJSON('@Url.Action("JSON_GetComentarios")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, cod_rango_fecha: _CodRangoFecha }, function (data) {
+                $("#txtGlosa").val(data.glosa);
+                var est_aprobacion = data.est_aprobacion;
+                if (est_aprobacion == 3)
+                    document.getElementById('pComentario').innerHTML = 'Este período ya se encuentra publicado, desea continuar?';
+                else
+                    document.getElementById('pComentario').innerHTML = 'Está seguro de publicar?';
+
+            });
+        }
+        PublicacionDataTable.draw();
+    });
+
+    @*$('#RegistroModal').on('show.bs.modal', function (event) {
+        var selectedUnidad = 'COR';
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedFrecuencia = $("#ddlFrecuenciaFilter").val();
+        var fecha = $("#dpFecha").val();
+        var _CodRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+        if (_CodRangoFecha != null && _CodRangoFecha != '') {
+            $.getJSON('@Url.Action("JSON_GetComentarios")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, cod_rango_fecha: _CodRangoFecha }, function (data) {
+                $("#txtGlosa").val(data.glosa);
+            });
+        }
+    });*@
+
+    var i = 0;
+    @*$('#ddlTipoFilter').change(function () {
+        i = 0;
+        var selectedUnidad = "";
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedTipo = $(this).val();
+        if (selectedTipo != null && selectedTipo != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorTipo")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad }, function (data) {
+                var frecuenciasSelect = $('#ddlFrecuenciaFilter');
+                frecuenciasSelect.empty();
+                $.each(data.Frecuencias, function (index, item) {
+                    frecuenciasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var periodosSelect = $('#ddlPeriodoFilter');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var mesesSelect = $('#ddlMesFilter');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFechaFilter');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    i++;
+                    if (i == data.Fechas.length) {
+                        PublicacionDataTable.draw();
+                    }
+                });
+
+            });
+        }
+    });*@
+
+
+    @*$('#ddlFrecuenciaFilter').change(function () {
+        i = 0;
+        var selectedUnidad = "";
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedFrecuencia = $(this).val();
+        if (selectedFrecuencia != null && selectedFrecuencia != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorFrecuencia")', { cod_modulo: selectedModulo ,cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia }, function (data) {
+                var periodosSelect = $('#ddlPeriodoFilter');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var mesesSelect = $('#ddlMesFilter');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFechaFilter');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    i++;
+                    if (i == data.Fechas.length) {
+                        PublicacionDataTable.draw();
+                    }
+                });
+
+            });
+        }
+    });*@
+
+    @*$('#ddlPeriodoFilter').change(function () {
+        i = 0;
+        var selectedUnidad = "";
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedFrecuencia = $("#ddlFrecuenciaFilter").val();
+        var selectedPeriodo = $(this).val();
+        if (selectedPeriodo != null && selectedPeriodo != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorPeriodo")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo }, function (data) {
+                var mesesSelect = $('#ddlMesFilter');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFechaFilter');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    i++;
+                    if (i == data.Fechas.length) {
+                        PublicacionDataTable.draw();
+                    }
+                });
+
+            });
+        }
+    });*@
+
+@*$('#ddlMesFilter').change(function () {
+        i = 0;
+        var selectedUnidad = "";
+        var selectedModulo = $("#ddlTipoFilter").val();
+        var selectedFrecuencia = $("#ddlFrecuenciaFilter").val();
+        var selectedPeriodo = $("#ddlPeriodoFilter").val();
+        var selectedMes = $(this).val();
+        if (selectedMes != null && selectedMes != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorMes")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo, mes: selectedMes }, function (data) {
+                var fechasSelect = $('#ddlFechaFilter');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    i++;
+                    if (i == data.Fechas.length) {
+                        PublicacionDataTable.draw();
+                    }
+                });
+
+            });
+        }
+    });*@
+
+    $(document).on("click", "#btnPublicarModal", function () {
+        var param = $(this).data('param');
+        //var CodRangoFecha = $("#ddlFechaFilter").val();
+        var fecha = $("#dpFecha").val();
+
+        if (fecha == "" || fecha == null) {
+            toastr.error("SELECCIONA UNA FECHA VALIDA");
+            return;
+        }
+
+        //if (param == "PUBLICAR_CON_CORREO") {
+        //    document.getElementById('pComentario').innerHTML = 'Está seguro de publicar?';
+        //}
+        //if (param == "PUBLICAR_SIN_CORREO") {
+        //    document.getElementById('pComentario').innerHTML = 'Está seguro de enviar a aplicativos moviles?';
+        //}
+
+        //document.getElementById('pComentario').innerHTML = 'Está seguro de publicar?';
+        $("#lblParamConfirm").val(param);
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#btnAceptar').on('click', function () {
+        $('#ConfirmarModal').modal('toggle');
+        $("#overlay").show();
+        //var CodRangoFecha = $("#ddlFechaFilter").val();
+        var accion = $("#lblParamConfirm").val();
+        var fecha = $("#dpFecha").val();
+        var CodRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+
+        var _obj = {
+            cod_modulo: $('#ddlTipoFilter').val(),
+            cod_frecuencia: $('#ddlFrecuenciaFilter').val(),
+            cod_rango_fecha: CodRangoFecha,
+            accion: accion,
+            glosa: $('#txtGlosa').val(),
+        };
+
+        var _url = '@Url.Action("Edit_Publicacion", "APP")';
+
+        $.post(_url, _obj).done(function (data) {
+            if (data.Status === 200) {
+                toastr.success(data.Message);
+                //$("#ddlPeriodoFilter").change();
+                $("#overlay").hide();
+                //PublicacionDataTable.draw();
+                i = 0;
+                var selectedUnidad = "COR";
+                var selectedModulo = $("#ddlTipoFilter").val();
+                var selectedFrecuencia = $("#ddlFrecuenciaFilter").val();
+                $.getJSON('@Url.Action("JSON_GetPanelFecha")', { cod_modulo: selectedModulo, cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: 0, mes: 0 }, function (data) {
+                    //$("#dpFecha").val(data.fec_informe);
+                    $("#dpFecha").datepicker('setDate', data.fec_informe);
+                    PublicacionDataTable.draw();
+                });
+            } else if (data.Status === 400) {
+                $("#overlay").hide();
+                toastr.error(data.Message);
+            } else {
+                $("#overlay").hide();
+                toastr.warning(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    $('#btnGuardar').on('click', function () {
+        //$('#RegistroModal').modal('toggle');
+        $("#overlay").show();
+        //var CodRangoFecha = $("#ddlFechaFilter").val();
+        var accion = 'INSERT_COMENTARIOS';
+        var fecha = $("#dpFecha").val();
+        var CodRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+
+        var _obj = {
+            cod_modulo: $('#ddlTipoFilter').val(),
+            cod_frecuencia: $('#ddlFrecuenciaFilter').val(),
+            cod_rango_fecha: CodRangoFecha,
+            accion: accion,
+            glosa: $('#txtGlosa').val(),
+        };
+
+        var _url = '@Url.Action("Edit_Publicacion", "APP")';
+
+        $.post(_url, _obj).done(function (data) {
+            if (data.Status === 200) {
+                toastr.success(data.Message);
+                //$("#ddlPeriodoFilter").change();
+                //$("#overlay").hide();
+                PublicacionDataTable.draw();
+            } else if (data.Status === 400) {
+                $("#overlay").hide();
+                toastr.error(data.Message);
+            } else {
+                $("#overlay").hide();
+                toastr.warning(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+
+        //$('#txtGlosa').val('');
+    });
+
+});
+$("#btnExportar").click(function () {
+    $("#btnGuardar").click();
+    $("#overlay").show();
+    var codUnidadNegocio = "COR";
+    var codFrecuencia = "D";
+    var fecha = $("#dpFecha").val();
+    var codRangoFecha = moment(fecha, 'DD/MM/YYYY').format('YYMMDD');
+    var accion = "XLS_OPE_EXCEL";
+
+    var _url = '@Url.Action("RunXls", "APP")?idx=@Session.SessionID&cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&cod_rango_fecha=' + codRangoFecha + '&accion=' + accion;
+
+    $.post(_url, null).done(function (data) {
+        $("#overlay").hide();
+        if (data.Status === 200) {
+            window.location.href = '@Url.Content("~")'+'APP/DownloadFile?archivoDestino='+ data.Message+ '&idx=@Session.SessionID';
+        }
+        else {
+            toastr.error(data.Message);
+        }
+    });
+});
+
+function formatPeriodo(cod_mes) {
+    var retval = cod_mes;
+    if (cod_mes.toString().length == 6) {
+        var periodo = cod_mes.toString().substring(0, 4);
+        var mes = cod_mes.toString().substring(cod_mes.toString().length, 4);
+        retval = periodo + "-" + mes;
+        return retval;
+    }
+    return retval;
+}
+
+    </script>
+}

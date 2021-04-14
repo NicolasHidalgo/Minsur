@@ -1,0 +1,499 @@
+﻿@using ReportViewerForMvc;
+@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "TableroControlCorreo";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DGestión</title>
+
+    <!-- Global stylesheets -->
+    <link rel="SHORTCUT ICON" href="~/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- Nico JS files -->
+    <script type="text/javascript" src="~/Scripts/string-format.js"></script>
+    <link href="~/Content/toastr.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="~/Scripts/toastr.js"></script>
+    <!-- /Nico JS files -->
+    <!-- Theme JS files -->
+    <script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/app.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+    <script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+    <script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+    <!-- /theme JS files -->
+
+</head>
+<body>
+    @if (Model.mensajeError != "")
+    {
+        <input id="txtMensaje" type="hidden" value="@Model.mensajeError" />
+    }
+    <!-- Basic modal -->
+    <div id="modal_default" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Confirmar</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="pComentario"></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger cierre" id="btnReaperturar">Re-aperturar</button>
+                    <button type="button" class="btn btn-success cierre" id="btnCerrar">Cerrar</button>
+                    <label id="showid" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /basic modal -->
+    <!-- Header -->
+    <!-- Main navbar -->
+    <div class="navbar navbar-inverse">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="@Url.Action("Index","Home")"><img src="~/assets/images/logo_light.png" alt=""></a>
+            <ul class="nav navbar-nav visible-xs-block">
+                @*<li><a data-toggle="collapse" data-target="#navbar-mobile"><i class="icon-tree5"></i></a></li>*@
+                <li><a id="btnControlesMobile" data-target="#navbar-mobile"><i class="icon-cogs"></i></a></li>
+            </ul>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-mobile">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown language-switch">
+                    <a id="btnControles"><i class="icon-cogs" title="Controles"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- /main navbar -->
+    <!-- Page container -->
+    <div class="page-container">
+        <!-- Page content -->
+        <div class="page-content">
+            <!-- Main content -->
+            <div class="content-wrapper">
+                <!-- Content area -->
+                <div class="content">
+                    <!-- PÁGINAS DINÁMICAS -->
+                    <!-- Main content -->
+                    <div class="container-fluid">
+                        <!-- Page header -->
+                        <div id="pHeader" class="page-header">
+                            <div class="page-header-content">
+                            </div>
+                            <div class="breadcrumb-line breadcrumb-line-component">
+                                <ul class="breadcrumb">
+                                    <li><a id="titulo" href="@Url.Action("Index","Home")"><i class="icon-printer position-left"></i> @Model.titulo</a></li>
+                                </ul>
+                                @*<ul class="breadcrumb-elements">
+                                        <li><a id="btnControles"><i class="icon-cogs" title="Controles"></i></a></li>
+                                    </ul>*@
+                            </div>
+                        </div>
+                        <!-- /page header -->
+                        <!-- Content area -->
+                        <div class="content">
+                            <!-- Page length options -->
+                            <div id="pControl" class="panel panel-flat">
+
+                                <div class="panel-body">
+                                    <div class="col-md-12" style="margin-bottom:-12px;">
+                                        <div class="form-group col-md-2 hidden">
+                                            <label>Unidad:</label>
+                                            @Html.TextBox("ddlUnidad", Model.cod_unidad_negocio)
+                                        </div>
+                                        <div class="form-group col-md-2 hidden">
+                                            <label>Formatos:</label>
+                                            @Html.TextBox("ddlFormato", Model.cod_carga_auxiliar)
+                                        </div>
+                                        <div class="form-group col-md-2 hidden">
+                                            <label>Frecuencia:</label>
+                                            @Html.TextBox("ddlFrecuencia", Model.cod_frecuencia)
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>Año:</label>
+                                            @Html.DropDownList("ddlPeriodo", Model.Periodos, new { @data_placeholder = "Periodos", @class = "select" })
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>Mes:</label>
+                                            @Html.DropDownList("ddlMes", Model.Meses, new { @data_placeholder = "Meses", @class = "select" })
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>Período:</label>
+                                            @Html.DropDownList("ddlFecha", Model.Fechas, new { @data_placeholder = "Fechas", @class = "select" })
+                                        </div>
+                                        <div class="form-group col-md-5" style="margin-top:27px;">
+                                            <button type="button" id="btnExportar" class="btn btn-default col-xs-4"><i class="icon-file-excel"></i> Excel</button>
+                                            <button type="button" id="btnReporte" class="btn btn-default col-xs-4"><i class="icon-printer2"></i> Reporte</button>
+                                            @if (Model.estado == "Pre-Cierre")
+                                            {
+                                                <button type="button" id="btnCerrarModal" class="btn btn-default col-xs-4"><i class="icon-lock"></i> Cierre</button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" id="btnCerrarModal" class="btn btn-default col-xs-4 hidden"><i class="icon-lock"></i> Cierre</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /page length options -->
+                            <div id="reportView">
+                                @*Aquí va el ReportView*@
+                            </div>
+                        </div>
+                        <!-- /content area -->
+                    </div>
+                    <!-- /main content -->
+                    <!--FIN PAGINAS DINAMICAS-->
+                    <!-- Footer -->
+                    <div class="footer text-muted text-center">
+                        Todos los derechos reservados <a href="#">Sistema de Gestión</a> por <a href="http://d-gestion.net" target="_blank">D-Gestión SAC</a>
+                    </div>
+                    <!-- /footer -->
+                </div>
+                <!-- /content area -->
+            </div>
+            <!-- /main content -->
+        </div>
+        <!-- /page content -->
+    </div>
+    <!-- /page container -->
+</body>
+</html>
+
+<style>
+    .modal {
+        text-align: center;
+        padding: 0 !important;
+    }
+
+    .modal:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-right: -4px;
+    }
+
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+    }
+</style>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Create overlay and append to body:
+        $('<div id="overlay"/>').css({
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: $(window).height() + 'px',
+            opacity: 0.4,
+            background: 'lightgray url(@Url.Content("~/assets/images/loader.gif")) no-repeat center'
+        }).hide().appendTo('body');
+
+        if ($("#txtMensaje").val() != "" && $("#txtMensaje").val() != null)
+            toastr["warning"]($("#txtMensaje").val()).css("width", "400px");
+    });
+
+$(function () {
+    if ($("#btnCerrarModal").is(":visible") == true) {
+        $("#btnExportar").addClass("col-xs-4");
+        $("#btnReporte").addClass("col-xs-4");
+        $("#btnExportar").removeClass("col-xs-6");
+        $("#btnReporte").removeClass("col-xs-6");
+    } else {
+        $("#btnExportar").removeClass("col-xs-4");
+        $("#btnReporte").removeClass("col-xs-4");
+        $("#btnExportar").addClass("col-xs-6");
+        $("#btnReporte").addClass("col-xs-6");
+    }
+
+    $('#ddlPeriodo').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedFormato = $("#ddlFormato").val();
+        var selectedPeriodo = $(this).val();
+
+        if (selectedPeriodo != null && selectedPeriodo != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorPeriodo")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo }, function (data) {
+                var mesesSelect = $('#ddlMes');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var selectedCodRangoFecha = $("#ddlFecha").val();
+                $.getJSON('@Url.Action("JSON_GetEstado")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, cod_rango_fecha: selectedCodRangoFecha, cod_carga_auxiliar: selectedFormato }, function (data) {
+                    if (data.estado == "Pre-Cierre") {
+                        $("#btnCerrarModal").removeClass("hidden");
+                        $("#btnExportar").addClass("col-xs-4");
+                        $("#btnReporte").addClass("col-xs-4");
+                        $("#btnExportar").removeClass("col-xs-6");
+                        $("#btnReporte").removeClass("col-xs-6");
+                        $("#btnCerrarModal").show();
+                    } else {
+                        $("#btnExportar").removeClass("col-xs-4");
+                        $("#btnReporte").removeClass("col-xs-4");
+                        $("#btnExportar").addClass("col-xs-6");
+                        $("#btnReporte").addClass("col-xs-6");
+                        $("#btnCerrarModal").hide();
+                    }
+                });
+            });
+
+
+        }
+    });
+
+    $('#ddlMes').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedPeriodo = $("#ddlPeriodo").val();
+        var selectedFormato = $("#ddlFormato").val();
+        var selectedMes = $(this).val();
+        if (selectedMes != null && selectedMes != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorMes")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo, mes: selectedMes }, function (data) {
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var selectedCodRangoFecha = $("#ddlFecha").val();
+                $.getJSON('@Url.Action("JSON_GetEstado")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, cod_rango_fecha: selectedCodRangoFecha, cod_carga_auxiliar: selectedFormato }, function (data) {
+                    if (data.estado == "Pre-Cierre") {
+                        $("#btnCerrarModal").removeClass("hidden");
+                        $("#btnExportar").addClass("col-xs-4");
+                        $("#btnReporte").addClass("col-xs-4");
+                        $("#btnExportar").removeClass("col-xs-6");
+                        $("#btnReporte").removeClass("col-xs-6");
+                        $("#btnCerrarModal").show();
+                    } else {
+                        $("#btnExportar").removeClass("col-xs-4");
+                        $("#btnReporte").removeClass("col-xs-4");
+                        $("#btnExportar").addClass("col-xs-6");
+                        $("#btnReporte").addClass("col-xs-6");
+                        $("#btnCerrarModal").hide();
+                    }
+                });
+
+            });
+        }
+    });
+
+
+    $('#ddlFecha').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedPeriodo = $("#ddlPeriodo").val();
+        var selectedFormato = $("#ddlFormato").val();
+        var selectedMes = $("#ddlMes").val();
+        var selectedCodRangoFecha = $("#ddlFecha").val();
+        $.getJSON('@Url.Action("JSON_GetEstado")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, cod_rango_fecha: selectedCodRangoFecha, cod_carga_auxiliar: selectedFormato }, function (data) {
+            if (data.estado == "Pre-Cierre") {
+                $("#btnCerrarModal").removeClass("hidden");
+                $("#btnExportar").addClass("col-xs-4");
+                $("#btnReporte").addClass("col-xs-4");
+                $("#btnExportar").removeClass("col-xs-6");
+                $("#btnReporte").removeClass("col-xs-6");
+                $("#btnCerrarModal").show();
+            } else {
+                $("#btnExportar").removeClass("col-xs-4");
+                $("#btnReporte").removeClass("col-xs-4");
+                $("#btnExportar").addClass("col-xs-6");
+                $("#btnReporte").addClass("col-xs-6");
+                $("#btnCerrarModal").hide();
+            }
+        });
+    });
+
+
+});
+
+    $("#btnExportar").click(function () {
+        $("#overlay").show();
+        var codUnidadNegocio = $('#ddlUnidad').val();
+        var codFrecuencia = $('#ddlFrecuencia').val();
+        var codCargaAuxiliar = $('#ddlFormato').val();
+        var codRangoFecha = $('#ddlFecha option:selected').val();
+
+        var _url = '@Url.Action("RunXls", "KOP")?idx=@Session.SessionID&cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&cod_rango_fecha=' + codRangoFecha +'&cod_carga_auxiliar='+codCargaAuxiliar;
+
+        $.post(_url, null).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                window.location.href = '@Url.Content("~")'+'KOP/DownloadFile?archivoDestino='+ data.Message+ '&idx=@Session.SessionID';
+            }
+            else {
+                toastr.error(data.Message)
+            }
+        });
+    });
+
+    var url = '@Url.Action("_TableroControl", "KOP")';
+    $('#btnReporte').click(function () {
+        if ($("#pHeader").is(":visible") == true) {
+            $("#pHeader").hide();
+        }
+
+        if ($("#pControl").is(":visible") == true) {
+            $("#pControl").hide();
+        }
+
+        $("#overlay").show();
+        var unidad = $('#ddlUnidad').val();
+        var frecuencia = $('#ddlFrecuencia').val();
+        var codCargaAuxiliar = $('#ddlFormato').val();
+        var fecha = $('#ddlFecha').val();
+        $('#reportView').load(url, { cod_unidad_negocio: unidad, cod_frecuencia: frecuencia, cod_rango_fecha: fecha, cod_carga_auxiliar: codCargaAuxiliar }, function () {
+            setTimeout(
+                function () {
+                    $('iframe').contents().find('body').css('backgroundColor', '#ffffff');
+                    $("#overlay").hide();
+                }, 8000);
+        });
+    })
+    $('#btnControles').click(function () {
+        if ($("#pHeader").is(":visible") == true) {
+            $("#pHeader").hide();
+        } else {
+            $("#pHeader").show();
+        }
+
+        if ($("#pControl").is(":visible") == true) {
+            $("#pControl").hide();
+        } else {
+            $("#pControl").show();
+        }
+    })
+    $('#btnControlesMobile').click(function () {
+        if ($("#pHeader").is(":visible") == true) {
+            $("#pHeader").hide();
+        } else {
+            $("#pHeader").show();
+        }
+
+        if ($("#pControl").is(":visible") == true) {
+            $("#pControl").hide();
+        } else {
+            $("#pControl").show();
+        }
+
+    })
+
+    $(document).on("click", "#btnCerrarModal", function () {
+        var periodo = $("#ddlFecha option:selected").text();
+        var unidad = $("#ddlUnidad").val();
+        var frecuencia = $("#ddlFrecuencia").val();
+        var titulo = $("#titulo").text();
+
+        if (periodo == "" || periodo == null) {
+            document.getElementById('pComentario').innerHTML = 'No hay un período que cerrar';
+            $("#btnCerrar").hide();
+        }
+        else {
+            document.getElementById('pComentario').innerHTML = 'Esta seguro que desea cerrar el ' + titulo + ' del período ' + periodo;
+            $("#btnCerrar").show();
+        }
+        $('#modal_default').modal('show');
+    });
+
+    $(".cierre").on("click", function () {
+        $('#modal_default').modal('toggle');
+        $("#overlay").show();
+
+        var action = this.id;
+        if (action == "btnCerrar")
+            action = "CERRAR";
+
+        if (action == "btnReaperturar")
+            action = "ABRIR";
+
+        var _aprobacion = {
+            cod_unidad_negocio: $("#ddlUnidad").val(),
+            cod_frecuencia: $("#ddlFrecuencia").val(),
+            cod_rango_fecha: $("#ddlFecha option:selected").val(),
+            accion: action,
+            cod_carga_auxiliar : $("#ddlFormato").val()
+        };
+
+        var _url = '@Url.Action("CierreTableroCorreo", "KOP")';
+
+        $.post(_url, _aprobacion).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                $("#btnExportar").removeClass("col-xs-4");
+                $("#btnReporte").removeClass("col-xs-4");
+                $("#btnExportar").addClass("col-xs-6");
+                $("#btnReporte").addClass("col-xs-6");
+                $("#btnCerrarModal").hide();
+
+                //$('#modal_default').modal('toggle');
+                toastr.success(data.Message);
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message).css("width", "500px");
+            } else {
+                toastr.error(data.Message).css("width", "500px");
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            $("#overlay").hide();
+            toastr.warning(err).css("width", "500px");
+        });
+    });
+
+</script>

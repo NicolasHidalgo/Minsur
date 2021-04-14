@@ -1,0 +1,389 @@
+﻿@{
+    ViewBag.Title = "Consulta_Estructura";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormEstructura">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="txtCodTajoEstructura" class="col-form-label">Código</label>
+                        <input type="text" class="form-control" id="txtCodTajoEstructura" name="txtCodTajoEstructura" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtNomTajoEstructura" class="col-form-label">Estructura</label>
+                        <input type="text" class="form-control" id="txtNomTajoEstructura" name="txtNomTajoEstructura">
+                    </div>
+                    <div class="form-group">
+                        <label for="ddlTipMineral" class="col-form-label">Tipo Mineral</label>
+                        <select class="form-control" name="ddlTipMineral" id="ddlTipMineral"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtCodInterno" class="col-form-label">Cód. Interno</label>
+                        <input type="text" class="form-control" id="txtCodInterno" name="txtCodInterno">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodTajoEstructuraOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Estructuras</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                <li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            <table id="EstructuraDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+$(function () {
+
+    var EstructuraDataTable = $('#EstructuraDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.MINApi.GetDataTable_Estructura(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_unidad_negocio: $('#lblCodUnidadNegocio').text()
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Código',
+            data: 'cod_tajo_estructura',
+            name: 'cod_tajo_estructura',
+            className: 'cod_tajo_estructura',
+            responsivePriority: 1
+        },
+        {
+            title: 'Estructura',
+            data: 'nom_tajo_estructura',
+            name: 'nom_tajo_estructura',
+            className: 'nom_tajo_estructura'
+        },
+        {
+            title: 'Tipo',
+            data: 'tip_mineral',
+            name: 'tip_mineral',
+            className: 'tip_mineral'
+        },
+        {
+            title: 'Cód Interno',
+            data: 'cod_interno',
+            name: 'cod_interno',
+            className: 'cod_interno'
+        },
+        {
+            title: '',
+            data: 'vacio',
+            name: 'vacio'
+        },
+        {
+            title: '',
+            data: 'vacio',
+            name: 'vacio'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.cod_tajo_estructura + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_tajo_estructura + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#EstructuraDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        EstructuraDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        EstructuraDataTable.draw();
+    });
+
+
+    var codValidator = $('#FormEstructura').validate({
+        rules: {
+            txtNomTajoEstructura: {
+                required: true
+            },
+            ddlTipMineral: {
+                required: true
+            }
+        },
+        messages: {
+            txtNomTajoEstructura: {
+                required: 'Ingrese un nombre'
+            },
+            ddlTipMineral: {
+                required: 'Ingrese un tipo mineral'
+            }
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            var _tajoEstructura = {
+                cod_tajo_estructura: $('#lblCodTajoEstructuraOrigen').val(),
+                nom_tajo_estructura: $('#txtNomTajoEstructura').val(),
+                tip_mineral: $('#ddlTipMineral option:selected').text(),
+                cod_interno: $('#txtCodInterno').val(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Estructura", "MIN")';
+
+            $.post(_url, _tajoEstructura).done(function (data) {
+                if (data.Status === 200) {
+                    $('#RegistroModal').modal('toggle');
+                    toastr.success(data.Message);
+                    EstructuraDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+
+    $('#btnEliminar').on('click', function () {
+        var _estructura = {
+            cod_tajo_estructura: $("#showid").val()
+        };
+
+        var _url = '@Url.Content("~")'+'MIN/Delete_Estructura'
+
+        $.post(_url, _estructura).done(function (data) {
+            if (data.Status === 200) {
+                $('#ConfirmarModal').modal('toggle');
+                toastr.success(data.Message);
+                EstructuraDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+});
+
+$(document).on("click", ".rowDelete", function () {
+    var idEstructura = $(this).data('id');
+    $("#showid").val(idEstructura);
+    document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+    $('#ConfirmarModal').modal('show');
+});
+
+$('#RegistroModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var action = button.data('whatever');
+    var titulo = "";
+
+    if (action == "CREATE") {
+        titulo = "AGREGAR";
+    } else {
+        titulo = "ACTUALIZAR";
+    }
+
+    if (action == 'UPDATE') {
+        $("#txtCodTajoEstructura").val(button.closest("tr").find(".cod_tajo_estructura").text());
+        $("#txtCodTajoEstructura").prop('disabled', true);
+        $("#txtNomTajoEstructura").val(button.closest("tr").find(".nom_tajo_estructura").text());
+        $("#txtCodInterno").val(button.closest("tr").find(".cod_interno").text());
+    } else {
+        $("#txtCodTajoEstructura").prop('disabled', true);
+        $("#txtCodTajoEstructura").val('');
+        $("#txtNomTajoEstructura").val('');
+        $("#ddlTipMineral").val('');
+        $("#txtCodInterno").val('');
+    }
+
+   $.getJSON('@Url.Action("JSON_GetDropDownTipoMineral")', { cod_unidad_negocio: '', tipMineral: button.closest("tr").find(".tip_mineral").text() }, function (data) {
+        var select = $('#ddlTipMineral');
+        select.empty();
+        var i = 0;
+        $.each(data, function (index, item) {
+            i += 1;
+            select.append($('<option/>', {
+                value: item.Value,
+                text: item.Text,
+                selected: item.Selected
+            }));
+        });
+    });
+
+
+    $("#lblAccion").val(action);
+    $("#lblCodTajoEstructuraOrigen").val($.trim(button.closest("tr").find(".cod_tajo_estructura").text()));
+    var modal = $(this)
+    modal.find('.modal-title').text(titulo)
+    //modal.find('.modal-body input').val(recipient)
+});
+    </script>
+}

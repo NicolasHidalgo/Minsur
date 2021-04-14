@@ -1,0 +1,562 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "ProduccionDia";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/2.0.0/handsontable.full.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/2.0.0/handsontable.full.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+<!-- /theme JS files -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-printer position-left"></i> Reporte Diario de Producción (RDP)</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a>Fecha:&nbsp;</a></li>
+                <li><input type="text" class="form-control" id="dpFecInforme" value="@ViewBag.fecha" readonly="readonly" /></li>
+                <li><a id="load"><i class="icon-database-refresh"></i> Cargar</a></li>
+                <li><a id="save" class="hidden"><i class="icon-floppy-disk"></i> Grabar</a></li>
+                <li><a id="btnExportar" class="hidden"><i class="icon-file-excel" title="Exportar Excel"></i></a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div id="pControl" class="panel panel-flat">
+            <div class="panel-body">
+                <div class="hot-container">
+                    <input id="sheet" class="hidden" />
+                    <div id="example1" class="hot handsontable dataTable table-striped center-block*"></div>
+                </div>
+            </div>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+    $('#dpFecInforme').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+</script>
+
+@section Styles{
+    <style></style>
+}
+
+@section Scripts{
+    <script>
+$(function () {
+    var
+    $$ = function(id) {
+      return document.getElementById(id);
+    },
+    container = $$('example1'),
+    //exampleConsole = $$('example1console'),
+    load = $$('load'),
+    save = $$('save'),
+    hot;
+
+    var cellStyle = "";
+    var formatoCondicionalFlag = 0;
+    var codUnidadNegocio = $('#lblCodUnidadNegocio').text();
+    var codUsuario = $("#lblCodUsuario").val();
+    var codFrecuencia = 'D';
+    var fecInforme = $("#dpFecInforme").val();
+    var columnArray = [];
+    var cantColumns = 35;
+    var colEstilo = cantColumns - 1;
+    //var colCambio = cantColumns - 1;
+    //var colEstilo = colCambio - 1;
+    var colValorDia = 0;
+    var colTotalDia = 0;
+    var colAjtDia = 0;
+    var colTotalAcm = 0;
+    var colAjtAcm = 0;
+    var colValorAcm = 0;
+    var colValorCam = 0;
+    var colValorCam2 = 0;
+    var colValorCam3 = 0;
+    var colEmpty = 0;
+    var colSemaforoD = 0;
+    var colSemaforoA = 0;
+    var colSemaforoC1 = 0;
+    var colSemaforoC2 = 0;
+
+    var fecInforme = $("#dpFecInforme").val();
+    $.getJSON('@Url.Action("Get_ProduccionHeader")', { cod_unidad_negocio: '', cod_frecuencia: 'D', fec_informe: fecInforme }, function (data) {
+        var i = 0;
+        $.each(data, function (i) {
+            columnArray.push($(this));
+            if (columnArray[i][0].nom_campo == "D_imp_real") {
+                colAjtDia = i - 1;
+                colTotalDia = i - 2;
+                colValorDia = i;
+                colTotalAcm = i + 5;
+                colAjtAcm = colTotalAcm + 1;
+                colValorAcm = colValorDia + 7;
+                colValorCam = colValorAcm + 5;
+                colValorCam2 = colValorCam + 5;
+                colValorCam3 = colValorCam2 + 5;
+            }
+            if (columnArray[i][0].nom_campo == "D_imp_real_sem") {
+                colSemaforoD = i + 1;
+            }
+            if (columnArray[i][0].nom_campo == "A_imp_acm_sem") {
+                colSemaforoA = i + 1;
+            }
+
+            var campo = columnArray[i][0].nom_campo;
+            if (colSemaforoC1 == 0) {
+                if (campo.match("^C_")) {
+                    if (campo.match("_sem$")) {
+                        colSemaforoC1 = i + 1;
+                        colSemaforoC2 = colSemaforoC1 + 5;
+                    }
+                }
+            }
+
+            if (columnArray[i][0].nom_campo == "") {
+                if (colEmpty == 0) {
+                    colEmpty = i
+                }
+            }
+        });
+    });
+
+    $("#dpFecInforme").change(function () {
+        colEmpty = 0;
+        colSemaforoC1 = 0;
+        colSemaforoC2 = 0;
+        var fecInforme = $("#dpFecInforme").val();
+        $('#save').addClass("hidden");
+        $("#btnExportar").addClass("hidden");
+        columnArray = [];
+        $.getJSON('@Url.Action("Get_ProduccionHeader")', { cod_unidad_negocio: '', cod_frecuencia: 'D', fec_informe: fecInforme }, function (data) {
+            var i = 0;
+            $.each(data, function (i) {
+                columnArray.push($(this));
+                if (columnArray[i][0].nom_campo == "D_imp_real") {
+                    colAjtDia = i - 1;
+                    colTotalDia = i - 2;
+                    colValorDia = i;
+                    colTotalAcm = i + 5;
+                    colAjtAcm = colTotalAcm + 1;
+                    colValorAcm = colValorDia + 7;
+                    colValorCam = colValorAcm + 5;
+                    colValorCam2 = colValorCam + 5;
+                    colValorCam3 = colValorCam2 + 5;
+                }
+                if (columnArray[i][0].nom_campo == "D_imp_real_sem") {
+                    colSemaforoD = i + 1;
+                }
+                if (columnArray[i][0].nom_campo == "A_imp_acm_sem") {
+                    colSemaforoA = i + 1;
+                }
+                var campo = columnArray[i][0].nom_campo;
+                if (colSemaforoC1 == 0) {
+                    if (campo.match("^C_")) {
+                        if (campo.match("_sem$")) {
+                            colSemaforoC1 = i + 1;
+                            colSemaforoC2 = colSemaforoC1 + 5;
+                        }
+                    }
+                }
+                if (columnArray[i][0].nom_campo == "") {
+                    if (colEmpty == 0) {
+                        colEmpty = i
+                    }
+                }
+            });
+        });
+    });
+
+    function formatoCondicional(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+        cellStyle = ""
+
+        cellStyle = cellStyle + "color: black;"
+        if ((instance.propToCol("col3") === col) || (instance.propToCol("col" + colTotalDia) === col) ||
+            (instance.propToCol("col" + colTotalAcm) === col) || (instance.propToCol("col" + colValorDia) === col) ||
+            (instance.propToCol("col" + colValorAcm) === col) || (instance.propToCol("col" + colValorCam) === col) ||
+            (instance.propToCol("col" + colValorCam2) === col) || (instance.propToCol("col" + colValorCam3) === col)) {
+            cellStyle = cellStyle + 'border-right: 1px solid black !important;';
+        }
+
+        if (instance.getData()[row][instance.propToCol("estilo")] === 1) {
+            cellStyle = cellStyle + "background: #EDEDED;"
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 2) {
+            cellStyle = cellStyle + "background: #DCD6D6;"
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 20) {
+            cellStyle = cellStyle + 'background: #FFFFFF;font-weight: bold;';
+
+            if ((instance.propToCol("col3") === col) || (instance.propToCol("col" + colTotalDia) === col) ||
+                (instance.propToCol("col" + colTotalAcm) === col) || (instance.propToCol("col" + colValorDia) === col) ||
+                (instance.propToCol("col" + colValorAcm) === col) || (instance.propToCol("col" + colValorCam) === col) ||
+                (instance.propToCol("col" + colValorCam2) === col) || (instance.propToCol("col" + colValorCam3) === col)) {
+                cellStyle = cellStyle + 'background: #FFFFFF;font-weight: bold;border-right: 1px solid black !important;';
+            }
+        }
+        if ((row < 4 && col > 2) || col == 2) {
+            cellStyle = cellStyle + 'text-align: center;'
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 10) {
+            cellStyle = cellStyle +  'border-bottom: 2px solid black !important;border-top: 1px solid black !important;background: #FFFFFF;font-weight: bold;';
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 3) {
+            cellStyle = cellStyle + 'border-bottom: 1px solid black !important;';
+            if ((instance.propToCol("col3") === col) || (instance.propToCol("col" + colTotalDia) === col) || (instance.propToCol("col" + colValorDia) === col) || (instance.propToCol("col" + colValorAcm) === col) || (instance.propToCol("col" + colValorCam) === col) || (instance.propToCol("col" + colValorCam2) === col)) {
+                cellStyle = cellStyle +  'border-bottom: 1px solid black !important;border-right: 1px solid black !important;';
+            }
+        }
+        td.style = cellStyle;
+    }
+
+
+    function color(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.NumericRenderer.apply(this, arguments);
+
+        cellStyle = ""
+        cellStyle = cellStyle + "color: black;"
+        if ((instance.propToCol("col3") === col) || (instance.propToCol("col" + colTotalDia) === col) ||
+            (instance.propToCol("col" + colTotalAcm) === col) || (instance.propToCol("col" + colValorDia) === col) ||
+            (instance.propToCol("col" + colValorAcm) === col) || (instance.propToCol("col" + colValorCam) === col) ||
+            (instance.propToCol("col" + colValorCam2) === col) || (instance.propToCol("col" + colValorCam3) === col)) {
+            cellStyle = cellStyle + 'border-right: 1px solid black !important;';
+        }
+
+        if (instance.getData()[row][instance.propToCol("estilo")] === 1) {
+            cellStyle = cellStyle + "background: #EDEDED;"
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 2) {
+            cellStyle = cellStyle + "background: #DCD6D6;"
+        }
+        if (row >= 4 && col > 2) {
+            cellStyle = cellStyle + 'text-align: right;'
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 3) {
+            cellStyle = cellStyle + 'border-bottom: 1px solid black !important;';
+            if ((instance.propToCol("col3") === col) || (instance.propToCol("col" + colTotalDia) === col) ||
+                (instance.propToCol("col" + colTotalAcm) === col) || (instance.propToCol("col" + colValorDia) === col) ||
+                (instance.propToCol("col" + colValorAcm) === col) || (instance.propToCol("col" + colValorCam) === col) ||
+                (instance.propToCol("col" + colValorCam2) === col) || (instance.propToCol("col" + colValorCam3) === col)) {
+                cellStyle = cellStyle + 'border-bottom: 1px solid black !important;border-right: 1px solid black !important;';
+            }
+        }
+        if (instance.propToCol("col" + (colValorDia + 1)) === col) {
+            if (row > 4) {
+                cellStyle = cellStyle + "background: #DAE6FF;"
+            }
+        }
+        if (instance.getData()[row][instance.propToCol("estilo")] === 10) {
+            cellStyle = cellStyle + 'border-bottom: 2px solid black !important;border-top: 1px solid black !important;background: #FFFFFF;font-weight: bold;';
+        }
+
+        if (instance.propToCol("col" + colSemaforoD) === col) {
+            var colour = instance.getData()[row][instance.propToCol("col" + colSemaforoD)]
+            if (colour != null || colour != "") {
+                cellStyle = cellStyle + 'background-image: url(@Url.Content("~")' + 'assets/images/' + colour +'.png);background-repeat: no-repeat;background-position: center;color:transparent;';
+            }
+        }
+        if (instance.propToCol("col" + colSemaforoA) === col) {
+            var colour = instance.getData()[row][instance.propToCol("col" + colSemaforoA)]
+            if (colour != null || colour != "") {
+                cellStyle = cellStyle + 'background-image: url(@Url.Content("~")' + 'assets/images/' + colour +'.png);background-repeat: no-repeat;background-position: center;color:transparent;';
+            }
+        }
+        if (instance.propToCol("col" + colSemaforoC1) === col) {
+            var colour = instance.getData()[row][instance.propToCol("col" + colSemaforoC1)]
+            if (colour != null || colour != "") {
+                cellStyle = cellStyle + 'background-image: url(@Url.Content("~")' + 'assets/images/' + colour +'.png);background-repeat: no-repeat;background-position: center;color:transparent;';
+            }
+        }
+        if (instance.propToCol("col" + colSemaforoC2) === col) {
+            var colour = instance.getData()[row][instance.propToCol("col" + colSemaforoC2)]
+            if (colour != null || colour != "") {
+                cellStyle = cellStyle + 'background-image: url(@Url.Content("~")' + 'assets/images/' + colour +'.png);background-repeat: no-repeat;background-position: center;color:transparent;';
+            }
+        }
+
+        td.style = cellStyle;
+    }
+
+
+
+    hot = new Handsontable(container, {
+        startRows: 1,
+        startCols: cantColumns,
+        rowHeaders: true,
+        colHeaders: true,
+        renderAllRows: false,
+        renderAllColumns: false
+    });
+
+    $("#load").click(function () {
+        //Handsontable.dom.addEvent(load, 'click', function() {
+        $("#overlay").show();
+        var codUnidadNegocio = $('#lblCodUnidadNegocio').text();
+        var codUsuario = $("#lblCodUsuario").val();
+        var codFrecuencia = 'D';
+        var fecInforme = $("#dpFecInforme").val();
+        var _url = '@Url.Content("~")' + 'BAL/Get_ProduccionDia?cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&fec_informe=' + fecInforme
+        formatoCondicionalFlag = 0;
+
+        $.ajax({
+            url: _url, //Controller to Get the
+            type: "GET",
+            dataType: "json",
+            contentType: 'application/json;charset=utf-8', // dataType and contentType should be json
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (data) {      // on Success send the Json data to the table by using loaddata function""
+                if (data.Item2.tipo == "ERROR") {
+                    $("#overlay").hide();
+                    toastr.error(data.Item2.mensaje);
+                    return;
+                }
+                $('#save').removeClass("hidden");
+                $("#btnExportar").removeClass("hidden");
+                hot.updateSettings({
+                    data: data.Item1,
+                    cells: function (row, col, prop) {
+                        //Here we can change every single cell's properties.
+                        var columnMeta = {}
+                        if (row > 4 && col > 2) {
+                            if (col < colEmpty) {
+                                if (hot.getData()[row][2] === "%") {
+                                    columnMeta.type = 'numeric',
+                                        columnMeta.numericFormat = {
+                                            pattern: '0.00%'
+                                        }
+                                } else {
+                                    columnMeta.type = 'numeric',
+                                        columnMeta.numericFormat = {
+                                            pattern: '#,##0.00'
+                                        }
+                                }
+
+                                if (col == colSemaforoD || col == colSemaforoA || col == colSemaforoC1 || col == colSemaforoC2) {
+                                    columnMeta.type = 'numeric',
+                                        columnMeta.numericFormat = {
+                                            pattern: '0%'
+                                        }
+                                }
+                                columnMeta.renderer = color;
+                            }
+                        }
+                        return columnMeta
+                    },
+                    mergeCells: [
+                        { row: 0, col: colValorDia, rowspan: 1, colspan: 5 },
+                        { row: 0, col: colValorAcm, rowspan: 1, colspan: 5 },
+                        { row: 0, col: colValorCam, rowspan: 1, colspan: 5 },
+                        { row: 0, col: colValorCam2, rowspan: 1, colspan: 5 }
+                    ],
+                    fixedColumnsLeft: 2,
+                    fixedRowsTop: 3,
+                    columns: function (column) {
+                        var columnMeta = {};
+
+                        if (columnArray.length != 0) {
+                            if (column === 0) {
+                                columnMeta.data = columnArray[0][0].data;
+                                columnMeta.readOnly = true;
+                                columnMeta.width = 65;
+                                columnMeta.renderer = formatoCondicional;
+                            } else if (column === 1) {
+                                columnMeta.data = columnArray[1][0].data;
+                                columnMeta.readOnly = true;
+                                columnMeta.width = 180;
+                                columnMeta.renderer = formatoCondicional;
+                            } else if (column === 2) {
+                                columnMeta.data = columnArray[2][0].data;
+                                columnMeta.readOnly = true;
+                                columnMeta.width = 40;
+                                columnMeta.renderer = formatoCondicional;
+                            } else if (column >= 3 && column < 33) {
+                                columnMeta.data = columnArray[column][0].data;
+                                if (columnArray[column][0].nom_campo == "D_imp_real") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    colValorDia = column;
+                                    columnMeta.width = 70;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (columnArray[column][0].nom_campo == "D_imp_real_sem") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 40;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (columnArray[column][0].nom_campo == "D_imp_real_var") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 50;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (columnArray[column][0].nom_campo == "A_imp_acm_sem") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 40;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (columnArray[column][0].nom_campo == "A_imp_acm_var") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 50;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (column == (colSemaforoC1 - 1)) {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 40;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (column == colSemaforoC1) {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.width = 50;
+                                    columnMeta.readOnly = false;
+                                    columnMeta.renderer = formatoCondicional;
+                                } else if (columnArray[column][0].nom_campo == "estilo") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.readOnly = true;
+                                    columnMeta.width = 1;
+                                } else if (columnArray[column][0].nom_campo == "") {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.readOnly = true;
+                                    columnMeta.width = 1;
+                                } else {
+                                    columnMeta.data = columnArray[column][0].data;
+                                    columnMeta.readOnly = true;
+                                    columnMeta.renderer = formatoCondicional;
+                                    columnMeta.width = 70;
+                                }
+                            } else if (column === 33) {
+                                columnMeta.data = "estilo";
+                                columnMeta.readOnly = true;
+                                columnMeta.width = 1;
+                            } else {
+                                columnMeta = null;
+                            }
+                        } else {
+                            columnMeta = null;
+                        }
+                        return columnMeta;
+                    }
+                });
+                if (data.Item2.tipo == "WARNING") {
+                    toastr.warning(data.Item2.mensaje);
+                }
+                $("#overlay").hide();
+            },
+            error: function (xhr) {
+                alert('error');
+            }
+        //});
+        });
+    });
+
+
+    //POST method gets data to the Controller
+    Handsontable.dom.addEvent(save, 'click', function () {
+        $("#overlay").show();
+        var codUnidadNegocio = $('#lblCodUnidadNegocio').text();
+        var codUsuario = $("#lblCodUsuario").val();
+        var codFrecuencia = 'D';
+        var fecInforme = $("#dpFecInforme").val();
+        var _url = '@Url.Content("~")' + 'BAL/Save_Produccion?cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&fec_informe=' + fecInforme
+
+        //Filtra los cambios
+        var newArray = [];
+        for (var i = 0, l = hot.getData().length; i < l; i++) {
+            if (hot.getData()[i][hot.propToCol("estilo")] != "20" && hot.getData()[i][hot.propToCol("estilo")] != "10") {
+                    newArray.push({
+                        cod_balmet: hot.getData()[i][0],
+                        valor: hot.getData()[i][colValorDia]
+                    });
+            }
+        }
+
+        jQuery.ajax({
+            url: _url,
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(newArray),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (data) {
+                if (data.Status === 200) {
+                    $("#overlay").hide();
+                    toastr.success(data.Message);
+                    $("#load").click();
+                }
+                else {
+                    $("#overlay").hide();
+                    toastr.error(data.Message)
+                }
+            },
+            error: function (xhr) {
+                $("#overlay").hide();
+                alert(xhr.error);
+            }
+        });
+
+    });
+
+    $("#btnExportar").click(function () {
+        $("#overlay").show();
+        var codUnidadNegocio = $('#lblCodUnidadNegocio').text();
+        var codUsuario = $("#lblCodUsuario").val();
+        var codFrecuencia = 'D';
+        var fecInforme = $("#dpFecInforme").val();
+        var _url = '@Url.Action("RunXls", "BAL")?idx=@Session.SessionID&cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&fec_informe=' + fecInforme;
+
+        $.post(_url, null).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                window.location.href = '@Url.Content("~")'+'BAL/DownloadFile?archivoDestino='+ data.Message+ '&idx=@Session.SessionID';
+            }
+            else {
+                toastr.error(data.Message)
+            }
+        });
+    });
+
+});
+
+
+    </script>
+}

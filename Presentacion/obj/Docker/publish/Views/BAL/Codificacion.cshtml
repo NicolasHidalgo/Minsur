@@ -1,0 +1,463 @@
+﻿@{
+    ViewBag.Title = "Codificacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="modal_search" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+
+<!-- Basic modal -->
+<div id="modal_default" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p>Está seguro de que desea eliminar este registro?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+
+<div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormCodificacion">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="txtCodigo">Código</label>
+                            <input type="text" class="form-control" id="txtCodigo" placeholder="Código">
+                        </div>
+                        <div class="form-group col-md-9">
+                            <label for="txtDescripcion">Descripción</label>
+                            <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripción">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="txtUMB">UMB:</label>
+                            <input type="text" class="form-control" id="txtUMB" placeholder="UMB">
+                        </div>
+                        <div class="form-group col-md-9">
+                            <label for="txtIDRepProd">ID Reporte Produccion:</label>
+                            <input type="text" class="form-control" id="txtIDRepProd" placeholder="ID Reporte Produccion">
+                        </div>
+
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="ddlTipo">Tipo</label>
+                            <select id="ddlTipo" class="form-control">
+                                <option value="TIT">Título</option>
+                                <option value="CAP">Captura</option>
+                                <option value="FOR">Fórmula</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-9">
+                            <label for="txtFormula">Formula</label>
+                            <input type="text" class="form-control" id="txtFormula">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlIndicador">Indicador</label>
+                            <select id="ddlIndicador" class="form-control" name="ddlIndicador"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodBalmetOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<div class="container-fluid">
+    <!--class = "content-wrapper" hace que el width del table sea relativo-->
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Codificación del Balance Metalúrgico</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#modal_search"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                <li><a data-toggle="modal" data-target="#exampleModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            <table id="BAL_CodificacionDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script>
+$(document).ready(function () {
+    $('#ddlIndicador').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+});
+
+$(function () {
+
+    var BAL_CodificacionDataTable = $('#BAL_CodificacionDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.BALApi.GetDataTable_Codificacion(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_unidad_negocio: $('#lblCodUnidadNegocio').text()
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+
+        columns: [
+        {
+            title: 'UN',
+            data: 'cod_unidad_negocio',
+            name: 'cod_unidad_negocio',
+            width: "1%",
+            className: 'cod_unidad_negocio'
+        },
+        {
+            title: 'Código',
+            data: 'cod_balmet',
+            name: 'cod_balmet',
+            width: "10%",
+            className: 'cod_balmet'
+        },
+        {
+            title: 'Descripción',
+            data: 'nom_balmet',
+            name: 'nom_balmet',
+            width: "25%",
+            className: 'descripcion'
+        },
+        {
+            title: 'ID Reporte Producción',
+            data: 'ide_rep_produccion',
+            name: 'ide_rep_produccion',
+            width: "25%",
+            className: 'ide_rep_produccion'
+        },
+        {
+            title: 'UMB',
+            data: 'unidad',
+            name: 'unidad',
+            width: '1%',
+            className: 'unidad'
+        },
+        {
+            title: 'Tipo',
+            data: 'tip_balmet',
+            name: 'tip_balmet',
+            width: '1%',
+            className: 'tip_balmet'
+        },
+        {
+            title: 'Formula',
+            data: 'formula',
+            name: 'formula',
+            width: '25%',
+            className: 'formula'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "10px",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#exampleModal" data-whatever="UPDATE" data-id="' + full.cod_balmet +'"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#modal_default" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_balmet + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        },
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#BAL_CodificacionDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        BAL_CodificacionDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#modal_search').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        BAL_CodificacionDataTable.draw();
+    });
+
+    var codValidator = $('#FormCodificacion').validate({
+        rules: {
+            txtCodigo: {
+                required: true
+            },
+            txtDescripcion: {
+                required: true
+            }
+        },
+        messages: {
+            txtCodigo: {
+                required: 'Ingrese un código'
+            },
+            txtDescripcion: {
+                required: 'Ingrese una descripción'
+            }
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            var _codificacion = {
+                cod_balmet_origen: $('#lblCodBalmetOrigen').val(),
+                cod_balmet: $('#txtCodigo').val(),
+                nom_balmet: $('#txtDescripcion').val(),
+                ide_rep_produccion: $('#txtIDRepProd').val(),
+                unidad: $('#txtUMB').val(),
+                tip_balmet: $('#ddlTipo option:selected').val(),
+                formula: $('#txtFormula').val(),
+                cod_indicador: $('#ddlIndicador option:selected').val(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Codificacion", "BAL")';
+
+            $.post(_url, _codificacion).done(function (data) {
+                if (data.Status === 200) {
+                    $('#exampleModal').modal('toggle');
+                    toastr.success(data.Message);
+                    BAL_CodificacionDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+    $('#btnEliminar').on('click', function () {
+        var _codificacion = {
+            cod_balmet_origen: $('#showid').val(),
+            cod_balmet: $('#showid').val(),
+            accion: 'DELETE'
+        };
+
+        var _url = '@Url.Action("Edit_Codificacion", "BAL")';
+
+        $.post(_url, _codificacion).done(function (data) {
+            if (data.Status === 200) {
+                $('#modal_default').modal('toggle');
+                toastr.success(data.Message);
+                BAL_CodificacionDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    $('#ddlTipo').on('change', function () {
+        if ($(this).val() == "FOR") {
+            $("#txtFormula").prop('disabled', false);
+        } else {
+            $("#txtFormula").prop('disabled', true);
+        }
+    });
+
+});
+
+$(document).on("click", ".rowDelete", function () {
+    var cod_balmet_origen = $(this).data('id');
+    $("#showid").val(cod_balmet_origen);
+    $('#modal_default').modal('show');
+});
+
+$('#exampleModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var action = button.data('whatever');
+    var titulo = "";
+
+    if (action == "CREATE") {
+        titulo = "AGREGAR";
+        $("#txtCodigo").prop('disabled', false);
+    } else {
+        titulo = "ACTUALIZAR";
+        $("#txtCodigo").prop('disabled', true);
+    }
+
+    if (action == 'UPDATE') {
+        $("#txtCodigo").val(button.closest("tr").find(".cod_balmet").text());
+        $("#txtDescripcion").val(button.closest("tr").find(".descripcion").text());
+        $('#txtIDRepProd').val(button.closest("tr").find(".ide_rep_produccion").text());
+        $('#txtUMB').val(button.closest("tr").find(".unidad").text());
+        $('#ddlTipo').val(button.closest("tr").find(".tip_balmet").text());
+        $('#txtFormula').val(button.closest("tr").find(".formula").text());
+    } else {
+        $("#txtCodigo").val('');
+        $("#txtDescripcion").val('');
+        $('#txtIDRepProd').val('');
+        $('#txtUMB').val('');
+        $('#ddlTipo').val('');
+        $('#ddlIndicador').val('');
+        $('#txtFormula').val('');
+    }
+
+    if ($("#ddlTipo").val() == "FOR") {
+        $("#txtFormula").prop('disabled', false);
+    } else {
+        $("#txtFormula").prop('disabled', true);
+    }
+
+    $.getJSON('@Url.Action("JSON_GetDropDownIndicador")', { cod_unidad_negocio: '', cod_balmet:  $("#txtCodigo").val() }, function (data) {
+        var select = $('#ddlIndicador');
+        select.empty();
+        var i = 0;
+        $.each(data, function (index, item) {
+            i += 1;
+            select.append($('<option/>', {
+                value: item.Value,
+                text: item.Text,
+                selected: item.Selected
+            }));
+        });
+    });
+
+    $("#lblAccion").val(action);
+    $("#lblCodBalmetOrigen").val($.trim(button.closest("tr").find(".cod_balmet").text()));
+    var modal = $(this)
+    modal.find('.modal-title').text(titulo)
+});
+
+    </script>
+}

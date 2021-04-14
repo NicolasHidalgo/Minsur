@@ -1,0 +1,542 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Indicador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar:</h6>
+                <div class="form-group">
+                    <input class="form-control onlyNumber" id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="lblIdConfirm" />
+                <label id="lblParamConfirm" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal de detalle -->
+<div id="DetalleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"><i class="text-muted fa fa-shopping-cart"></i> <strong>Detalle del Indicador</strong></h4>
+            </div>
+            <div class="modal-body">
+                <table class="pull-left col-md-8 ">
+                    <tbody>
+                        <tr>
+                            <td class="h6"><strong>Unidad Negocio</strong></td>
+                            <td> </td>
+                            <td id="tdUnidadNegocio" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Cod. Indicador</strong></td>
+                            <td> </td>
+                            <td id="tdCodIndicador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Nom. Indicador</strong></td>
+                            <td> </td>
+                            <td id="tdNomIndicador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Unidad</strong></td>
+                            <td> </td>
+                            <td id="tdUnidad" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Num. Decimales</strong></td>
+                            <td> </td>
+                            <td id="tdNumDecimales" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Frecuencia Mes</strong></td>
+                            <td> </td>
+                            <td id="tdFrecMes" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Frecuencia Sem</strong></td>
+                            <td> </td>
+                            <td id="tdFrecSem" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Frecuencia Dia</strong></td>
+                            <td> </td>
+                            <td id="tdFrecDia" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Tipo Indicador</strong></td>
+                            <td> </td>
+                            <td id="tdTipIndicador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Tipo Acumulado</strong></td>
+                            <td> </td>
+                            <td id="tdTipAcumulado" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Ponderado Indicador</strong></td>
+                            <td> </td>
+                            <td id="tdPonderadoIndicador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Formula</strong></td>
+                            <td> </td>
+                            <td id="tdFormula" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Grupo</strong></td>
+                            <td> </td>
+                            <td id="tdGrupo" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>SubGrupo</strong></td>
+                            <td> </td>
+                            <td id="tdSubGrupo" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Fecha Vigencia</strong></td>
+                            <td> </td>
+                            <td id="tdFecVigencia" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Fecha Fin</strong></td>
+                            <td> </td>
+                            <td id="tdFecFin" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Origen</strong></td>
+                            <td> </td>
+                            <td id="tdOrigen" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Indicador Operativo</strong></td>
+                            <td> </td>
+                            <td id="tdCodIndicadorOperativo" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Tipo Variacion</strong></td>
+                            <td> </td>
+                            <td id="tdTipVariacion" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Enlace Indicador</strong></td>
+                            <td> </td>
+                            <td id="tdEnlaceIndicador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Agrupador</strong></td>
+                            <td> </td>
+                            <td id="tdAgrupador" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Cod Precio</strong></td>
+                            <td> </td>
+                            <td id="tdCodPrecio" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Enlace Comentario</strong></td>
+                            <td> </td>
+                            <td id="tdEnlaceComentario" class="h6"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Indicador Presupuesto</strong></td>
+                            <td> </td>
+                            <td id="tdCodIndicadorPresupuesto" class="h6"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br />
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de detalle -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Indicadores Costo</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                @*<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="ddlUnidadFilter" class="col-form-label">Unidades</label>
+                    @Html.DropDownList("ddlUnidadFilter", Model.Unidades, new { @data_placeholder = "Unidades" })
+                </div>
+            </div>
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+$(function () {
+    $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+})
+$(function () {
+
+    $('#ddlUnidadFilter').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true
+    });
+
+    $('#ddlIndicador').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+    $('#ddlFrecuencia,#ddlPais,#ddlFormato').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.KCSApi.GetDataTable_Indicador(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    cod_indicador: $('#global_filter').val(),
+                    cod_usuario: $('#lblCodUsuario').text(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter').val(),
+                    accion: 'SELECT'
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Und. Negocio',
+            data: 'cod_unidad_negocio',
+            name: 'cod_unidad_negocio',
+            className: 'cod_unidad_negocio',
+            responsivePriority: 1,
+            width: "5%",
+        },
+        {
+            title: 'Cod. Indicador',
+            data: 'cod_indicador',
+            name: 'cod_indicador',
+            className: 'cod_indicador',
+            width: "10%",
+        },
+        {
+            title: 'Nom. Indicador',
+            data: 'nom_indicador',
+            name: 'nom_indicador',
+            className: 'nom_indicador',
+            width: "30%",
+        },
+        {
+            title: 'UM',
+            data: 'unidad',
+            name: 'unidad',
+            className: 'unidad text-center',
+            width: "5%",
+        },
+        {
+            title: 'Frec. Mensual',
+            data: 'frecuencia_mes',
+            name: 'frecuencia_mes',
+            className: 'frecuencia_mes text-center',
+            width: "5%",
+        },
+        {
+            title: 'Frec. Semanal',
+            data: 'frecuencia_sem',
+            name: 'frecuencia_sem',
+            className: 'frecuencia_sem text-center',
+            width: "5%",
+        },
+        {
+            title: 'Frec. Diaria',
+            data: 'frecuencia_dia',
+            name: 'frecuencia_dia',
+            className: 'frecuencia_dia text-center',
+            width: "5%",
+        },
+        {
+            title: 'Grupo',
+            data: 'nom_grupo_indicador',
+            name: 'nom_grupo_indicador',
+            className: 'nom_grupo_indicador',
+            width: "25%",
+        },
+        {
+            title: 'Tipo',
+            data: 'tip_indicador',
+            name: 'tip_indicador',
+            className: 'tip_indicador',
+            width: "5%",
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var CodUnidadNegocio = full.cod_unidad_negocio;
+                var CodIndicador = full.cod_indicador;
+                var Frecuencia = full.frecuencia;
+                var TipCarga = full.tip_carga;
+                var CodIndicadorOperativo = full.cod_indicador_operativo;
+
+                var dropdown = '<ul class="icons-list text-center"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                @*dropdown += '<li><a href="@Url.Action("Edit_Indicador")?cod_unidad_negocio=' + CodUnidadNegocio + '&cod_indicador=' + CodIndicador + '&idx=@Session["session"].ToString()"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_indicador + '" data-param="' + full.cod_unidad_negocio + '"><i class="icon-bin"></i> Eliminar</a></li>';*@
+                dropdown += '<li><a data-toggle="modal" data-target="#DetalleModal" class="rowDetail" data-whatever="DETALLE" data-id="' + full.cod_indicador + '" data-param="' + full.cod_unidad_negocio + '"><i class="icon-eye-plus"></i> Ver Detalle</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+    $('#ddlUnidadFilter').on('change', function () {
+        PlantillaDataTable.draw();
+        @*$.getJSON('@Url.Action("JSON_GetDropDownIndicador")', { cod_unidad_negocio: $('#ddlUnidadFilter').val() }, function (data) {
+            var select = $('#ddlIndicador');
+            select.empty();
+            var i = 0;
+            $.each(data, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+        });*@
+    });
+
+    $('#btnEliminar').on('click', function () {
+        var _obj = {
+            //cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+            cod_frecuencia: $('#lblParamConfirm').val(),
+            ide_plantilla: $("#lblIdConfirm").val(),
+            accion: 'DELETE_XLS'
+        };
+
+        var _url = '@Url.Action("Edit_Plantilla", "APP")';
+
+        $.post(_url, _obj).done(function (data) {
+            if (data.Status === 200) {
+                $('#ConfirmarModal').modal('toggle');
+                toastr.success(data.Message);
+                PlantillaDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var id = $(this).data('id');
+        var param = $(this).data('param');
+        $("#lblIdConfirm").val(id);
+        $("#lblParamConfirm").val(param);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $(document).on("click", ".rowDetail", function () {
+        var id = $(this).data('id'); //ID
+        var param = $(this).data('param'); //UNIDAD NEGOCIO
+        if (id != null && id != '' && param != null && param != '') {
+            $.getJSON('@Url.Action("JSON_GetIndicador")', {cod_unidad_negocio: param, cod_indicador: id }, function (data) {
+                $("#tdUnidadNegocio").html(data.cod_unidad_negocio);
+                $("#tdCodIndicador").html(data.cod_indicador);
+                $("#tdNomIndicador").html(data.nom_indicador);
+                $("#tdUnidad").html(data.unidad);
+                $("#tdNumDecimales").html(data.num_decimales);
+                $("#tdFrecMes").html(data.frec_mes);
+                $("#tdFrecSem").html(data.frec_sem);
+                $("#tdFrecDia").html(data.frec_dia);
+                $("#tdTipIndicador").html(data.tip_indicador);
+                $("#tdTipAcumulado").html(data.tip_acumulado);
+                $("#tdPonderadoIndicador").html(data.ponderador);
+                $("#tdEnlaceIndicador").html(data.enlace_indicador);
+                $("#tdOrigen").html(data.origen);
+                $("#tdCodIndicadorOperativo").html(data.nom_indicador_operativo);
+                $("#tdFormula").html(data.formula);
+                $("#tdGrupo").html(data.nom_grupo_indicador);
+                $("#tdSubGrupo").html(data.nom_sybgrupo_indicador);
+                $("#tdFecVigencia").html('-');
+                if (data.fec_vigencia != null) {
+                    $("#tdFecVigencia").html(moment(data.fec_vigencia).format('DD/MM/YY'));
+                }
+                $("#tdFecFin").html('-');
+                if (data.fec_fin != null) {
+                    $("#tdFecFin").html(moment(data.fec_fin).format('DD/MM/YY'));
+                }
+                $("#tdTipVariacion").html(data.tip_variacion);
+                $("#tdAgrupador").html(data.agrupador);
+                $("#tdEnlaceComentario").html(data.enlace_comentario);
+                $("#tdCodIndicadorPresupuesto").html(data.nom_indicador_presupuesto);
+            });
+        }
+        $('#DetalleModal').modal('show');
+
+    });
+
+});
+
+
+    </script>
+}

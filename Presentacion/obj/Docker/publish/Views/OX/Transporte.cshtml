@@ -1,0 +1,539 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Transporte";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link href="~/Scripts/datepicker/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/datepicker/bootstrap-datepicker.es.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script src="~/Scripts/numeral/numeral.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+@*<div id="BuscarModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h6 class="text-semibold">Buscar:</h6>
+                    <div class="form-group">
+                        <input class="form-control " id="global_filter" placeholder="Buscar...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="lblIdConfirm" />
+                <label id="lblParamConfirm" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal de detalle -->
+<div id="DetalleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"><i class="text-muted fa fa-shopping-cart"></i> <strong>Detalle de Transporte</strong></h4>
+            </div>
+            <div class="modal-body">
+                <table class="pull-left col-md-8 ">
+                    <tbody>
+                        <tr>
+                            <td class="h6"><strong>IDE Movimiento</strong></td>
+                            <td> </td>
+                            <td id="tdIDEMovimiento" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>IDE Secuencia Movil</strong></td>
+                            <td> </td>
+                            <td id="tdIDEMovil" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Unidad Negocio</strong></td>
+                            <td> </td>
+                            <td id="tdUnidadNegocio" class="h5"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="h6"><strong>IMEI</strong></td>
+                            <td> </td>
+                            <td id="tdImei" class="h5"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="h6"><strong>Operador</strong></td>
+                            <td> </td>
+                            <td id="tdOperador" class="h5"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="h6"><strong>Vehiculo</strong></td>
+                            <td> </td>
+                            <td id="tdVehiculo" class="h5"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="h6"><strong>Turno</strong></td>
+                            <td> </td>
+                            <td id="tdTurno" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Guardia</strong></td>
+                            <td> </td>
+                            <td id="tdGuardia" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Material</strong></td>
+                            <td> </td>
+                            <td id="tdMaterial" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Fecha Operacion</strong></td>
+                            <td> </td>
+                            <td id="tdFecOperacion" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Fecha Descarga</strong></td>
+                            <td> </td>
+                            <td id="tdFecDescarga" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Mineral</strong></td>
+                            <td> </td>
+                            <td id="tdMineral" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Tonelada</strong></td>
+                            <td> </td>
+                            <td id="tdTonelada" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Ley</strong></td>
+                            <td> </td>
+                            <td id="tdLey" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Accion</strong></td>
+                            <td> </td>
+                            <td id="tdAccion" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Carguio Inicio</strong></td>
+                            <td> </td>
+                            <td id="tdCarguioIni" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Cargui Fin</strong></td>
+                            <td> </td>
+                            <td id="tdCarguioFin" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Ubicacion Inicio</strong></td>
+                            <td> </td>
+                            <td id="tdUbicacionIni" class="h5"></td>
+                        </tr>
+                        <tr>
+                            <td class="h6"><strong>Ubicacion Fin</strong></td>
+                            <td> </td>
+                            <td id="tdUbicacionFin" class="h5"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br />
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de detalle -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @*<form id="FormPlantilla">
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-8 hidden">
+                                <label for="txtID" class="col-form-label">ID</label>
+                                <input type="text" class="form-control" id="txtID" name="txtID">
+                            </div>
+
+                            <div class="form-group col-md-12">
+                                <label for="ddlTipo" class="col-form-label">Area</label>
+                                @Html.DropDownList("ddlTipo", Model.ddlTipo, new { @data_placeholder = "Tipo", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <label for="txtNomTipo" class="col-form-label">Nombre Tipo</label>
+                                <input type="text" class="form-control" id="txtNomTipo" name="txtNomTipo">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="txtNomCorto" class="col-form-label">Nombre Corto</label>
+                                <input type="text" class="form-control" id="txtNomCorto" name="txtNomCorto">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                        <label id="lblAccion" />
+                        <label id="lblCodOrigen" />
+                    </div>
+                </form>*@
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Transportes</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                @*<li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>*@
+                @*<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+
+            @*<div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ddlTipoFilter" class="col-form-label">Tipo</label>
+                            @Html.DropDownList("ddlTipoFilter", Model.ddlTipo, new { @data_placeholder = "Tipo", @class = "select" })
+                        </div>
+                    </div>
+                </div>*@
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script>
+
+$(function () {
+    $('#ddlTipo').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+        pageLength: this.all,
+        columnDefs: [{}],
+
+        ajax: {
+            url: urls.OXApi.GetDataTable_Movimiento(),
+            type: 'GET',
+            data: function (data) {
+
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    accion: 'SELECT_MOVIMIENTO'
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: '#',
+            data: 'ide_movimiento',
+            name: 'ide_movimiento',
+            className: 'ide_movimiento text-center',
+            responsivePriority: 1
+        },
+        {
+            title: '# Movil',
+            data: 'ide_secuencia_movil',
+            name: 'ide_secuencia_movil',
+            className: 'ide_secuencia_movil text-center',
+            responsivePriority: 1
+        },
+        {
+            title: 'U.N.',
+            data: 'cod_unidad_negocio',
+            name: 'cod_unidad_negocio',
+            className: 'cod_unidad_negocio text-center',
+            responsivePriority: 1
+        },
+        {
+            title: 'IMEI',
+            data: 'imei',
+            name: 'imei',
+            className: 'imei text-center'
+        },
+        {
+            title: 'Operador',
+            data: 'nom_operador',
+            name: 'nom_operador',
+            className: 'nom_operador'
+        },
+        {
+            title: 'Vehiculo',
+            data: 'nom_vehiculo',
+            name: 'nom_vehiculo',
+            className: 'nom_vehiculo'
+        },
+        {
+            title: 'Turno',
+            data: 'turno',
+            name: 'turno',
+            className: 'turno'
+        },
+        {
+            title: 'Guardia',
+            data: 'guardia',
+            name: 'guardia',
+            className: 'guardia text-center'
+        },
+        {
+            title: 'Material',
+            data: 'material',
+            name: 'material',
+            className: 'material'
+        },
+        {
+            title: 'Fec. Operacion',
+            data: 'fec_operacion',
+            name: 'fec_operacion',
+            className: 'fec_operacion text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return moment(data).format('DD/MM/YYYY hh:mm:ss ');
+                }
+                return '-';
+            }
+        },
+        {
+            title: 'Fec. Descarga',
+            data: 'fec_descarga',
+            name: 'fec_descarga',
+            className: 'fec_descarga text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return moment(data).format('DD/MM/YYYY hh:mm:ss ');
+                }
+                return '-';
+            }
+        },
+        {
+            title: 'Mineral',
+            data: 'nom_mineral',
+            name: 'nom_mineral',
+            className: 'nom_mineral'
+        },
+        {
+            title: 'Tn',
+            data: 'peso_mineral',
+            name: 'peso_mineral',
+            className: 'peso_mineral text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return numeral(data).format('0.00');
+                }
+                return '-';
+            }
+        },
+        {
+            title: 'Ley',
+            data: 'ley_mineral',
+            name: 'ley_mineral',
+            className: 'ley_mineral text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return numeral(data).format('0.00%');
+                }
+                return '-';
+            }
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list text-center"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                //dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.id + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                //dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.id + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#DetalleModal" class="rowDetail" data-whatever="DETALLE" data-id="' + full.ide_movimiento + '" data-param="' + full.cod_unidad_negocio + '"><i class="icon-eye-plus"></i> Ver Detalle</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+    $('#ddlTipoFilter').on('change', function () {
+        PlantillaDataTable.draw();
+    });
+
+
+    $(document).on("click", ".rowDetail", function () {
+        var id = $(this).data('id'); //ID
+        var param = $(this).data('param'); //UNIDAD NEGOCIO
+        if (id != null && id != '' && param != null && param != '') {
+            $.getJSON('@Url.Action("JSON_GetMovimiento")', {cod_unidad_negocio: param, ide_movimiento: id }, function (movimiento) {
+                $("#tdIDEMovimiento").html(movimiento.ide_movimiento);
+                $("#tdIDEMovil").html(movimiento.ide_secuencia_movil);
+                $("#tdUnidadNegocio").html(movimiento.cod_unidad_negocio);
+                $("#tdImei").html(movimiento.imei);
+                $("#tdOperador").html(movimiento.nom_operador);
+                $("#tdVehiculo").html(movimiento.nom_vehiculo);
+                $("#tdTurno").html(movimiento.turno);
+                $("#tdGuardia").html(movimiento.guardia);
+                $("#tdMaterial").html(movimiento.material);
+                $("#tdFecOperacion").html(moment(movimiento.fec_operacion).format('DD/MM/YY'));
+                $("#tdFecDescarga").html(moment(movimiento.fec_descarga).format('DD/MM/YY'));
+                $("#tdMineral").html(movimiento.nom_mineral);
+                $("#tdTonelada").html(movimiento.peso_mineral);
+                $("#tdLey").html(movimiento.ley_mineral);
+                $("#tdAccion").html(movimiento.tip_accion);
+                $("#tdCarguioIni").html(movimiento.carguio_ini);
+                $("#tdCarguioFin").html(movimiento.carguio_fin);
+                $("#tdUbicacionIni").html(movimiento.ubicacion_ini);
+                $("#tdUbicacionoFin").html(movimiento.ubicacion_fin);
+            });
+        }
+        $('#DetalleModal').modal('show');
+
+    });
+
+});
+
+
+
+    </script>
+}

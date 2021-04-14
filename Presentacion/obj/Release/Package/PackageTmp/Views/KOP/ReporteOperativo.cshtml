@@ -1,0 +1,594 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    /**/
+
+    ViewBag.Title = "ReporteOperativo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.js"></script>
+
+<!-- /theme JS files -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-printer position-left"></i> Reporte Operativo</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnControles"><i class="icon-cogs" title="Controles"></i></a></li>
+                @*<li><a id="btnExportar"><i class="icon-file-excel" title="Exportar Excel"></i></a></li>
+                    <li><a id="btnReporte"><i class="icon-printer2" title="Reporte"></i></a></li>
+                    <li><a id="btnCerrar"><i class="icon-lock" title="Cierre"></i></a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div id="pControl" class="panel panel-flat">
+
+            <div class="panel-body">
+                <div class="col-md-12" style="margin-bottom:-12px;">
+                    <div class="form-group col-md-2">
+                        <label>Unidad:</label>
+                        @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Año:</label>
+                        @Html.DropDownList("ddlAnio", Model.ddlAnio, new { @data_placeholder = "Año", @class = "select", @multiple = "multiple" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Mes:</label>
+                        @Html.DropDownList("ddlMes", Model.ddlMes, new { @data_placeholder = "Mes", @class = "select", @multiple = "multiple" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Semana:</label>
+                        @Html.DropDownList("ddlSemana", Model.ddlSemana, new { @data_placeholder = "Semana", @class = "select", @multiple = "multiple" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Dia:</label>
+                        @Html.DropDownList("ddlDia", Model.ddlDia, new { @data_placeholder = "Dia", @class = "select", @multiple = "multiple" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Procesar:</label><br />
+                        <button type="button" id="btnProcesar" class="btn btn-primary">Procesar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page length options -->
+        <!-- Form horizontal -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <div class="text-center"><h3 id="titulo" style="margin-top:0;"></h3></div>
+
+                <div id="reporte"></div>
+            </div>
+        </div>
+        <!-- /content area -->
+        <!-- /main content -->
+    </div>
+
+    @section Styles{
+        <style>
+            .datatable-header {
+                display: none;
+            }
+
+            table.dataTable thead tr {
+                background-color: #3f444e;
+                color: white;
+            }
+
+            .modal {
+                text-align: center;
+                padding: 0 !important;
+            }
+
+                .modal:before {
+                    content: '';
+                    display: inline-block;
+                    height: 100%;
+                    vertical-align: middle;
+                    margin-right: -4px;
+                }
+
+            .modal-dialog {
+                display: inline-block;
+                text-align: left;
+                vertical-align: middle;
+            }
+
+            .ui-autocomplete {
+                z-index: 215000000 !important;
+            }
+
+            .select2-no-results {
+                display: none !important;
+            }
+        </style>
+    }
+
+    @section Scripts{
+        <script>
+$(function () {
+
+    //$('#ddlAnio,#ddlMes,#ddlSemana,#ddlDia').select2({
+    //    theme: 'bootstrap',
+    //    width: '100%',
+    //    placeholder: "",
+    //    allowClear: true,
+    //    debug: true
+    //});
+
+    Array.prototype.contains = function (v) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] === v) return true;
+        }
+        return false;
+    };
+
+    Array.prototype.unique = function () {
+        var arr = [];
+        for (var i = 0; i < this.length; i++) {
+            if (!arr.contains(this[i])) {
+                arr.push(this[i]);
+            }
+        }
+        return arr;
+    }
+
+    var selectedUnidad = $('#ddlUnidad').val();
+
+    @*$('#ddlUnidad').change(function () {
+        var selectedUnidad = $(this).val();
+        if (selectedUnidad != null && selectedUnidad != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorUnidad")', { cod_unidad_negocio: selectedUnidad }, function (data) {
+                var formatosSelect = $('#ddlFormato');
+                formatosSelect.empty();
+                $.each(data.Formatos, function (index, item) {
+                    formatosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var frecuenciasSelect = $('#ddlFrecuencia');
+                frecuenciasSelect.empty();
+                $.each(data.Frecuencias, function (index, item) {
+                    frecuenciasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var periodosSelect = $('#ddlPeriodo');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var mesesSelect = $('#ddlMes');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });*@
+
+
+    $('#ddlAnio').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        $("#ddlMes").empty();
+        $("#ddlSemana").empty();
+        $("#ddlDia").empty();
+        var selectedAnio = $(this).val();
+
+        var _aniosArr = [];
+        var _anios = "";
+        if (selectedAnio != null) {
+            $.map(selectedAnio, function (item) {
+                _aniosArr.push(item);
+            });
+            var _anios = _aniosArr.join(",");
+        }
+
+        if (_anios != null && _anios != '') {
+            $.getJSON('@Url.Action("JSON_GetParamReporteOpe")', { cod_unidad_negocio: selectedUnidad, anio: _anios }, function (data) {
+                var ddlSelect = $('#ddlMes');
+                ddlSelect.empty();
+                $.each(data.ddlMes, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                ddlSelect = $('#ddlSemana');
+                ddlSelect.empty();
+                $.each(data.ddlSemana, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                ddlSelect = $('#ddlDia');
+                ddlSelect.empty();
+                $.each(data.ddlDia, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+    $('#ddlMes').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedAnio = $("#ddlAnio").val();
+        $("#ddlSemana").empty();
+        $("#ddlDia").empty();
+        var selectedMes = $(this).val();
+
+        var _aniosArr = [];
+        var _anios = "";
+        if (selectedAnio != null) {
+            $.map(selectedAnio, function (item) {
+                _aniosArr.push(item);
+            });
+            var _anios = _aniosArr.join(",");
+        }
+
+        var _mesesArr = [];
+        var _meses = "";
+        if (selectedMes != null) {
+            $.map(selectedMes, function (item) {
+                _mesesArr.push(item);
+            });
+            var _meses = _mesesArr.join(",");
+        }
+
+        //if (selectedMes != null && selectedMes != '') {
+            $.getJSON('@Url.Action("JSON_GetParamReporteOpe")', { cod_unidad_negocio: selectedUnidad, anio: _anios, mes: _meses }, function (data) {
+
+                ddlSelect = $('#ddlSemana');
+                ddlSelect.empty();
+                $.each(data.ddlSemana, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        //selected: item.Selected
+                    }));
+                });
+                ddlSelect.prop('selectedIndex', -1)
+
+                ddlSelect = $('#ddlDia');
+                ddlSelect.empty();
+                $.each(data.ddlDia, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        //selected: item.Selected
+                    }));
+                });
+                ddlSelect.prop('selectedIndex', -1)
+
+            });
+        //}
+    });
+
+
+    $('#ddlSemana').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedAnio = $("#ddlAnio").val();
+        var selectedMes = $("#ddlMes").val();
+        $("#ddlDia").empty();
+        var selectedSemana = $(this).val();
+
+        var _aniosArr = [];
+        var _anios = "";
+        if (selectedAnio != null) {
+            $.map(selectedAnio, function (item) {
+                _aniosArr.push(item);
+            });
+            var _anios = _aniosArr.join(",");
+        }
+
+        var _mesesArr = [];
+        var _meses = "";
+        if (selectedMes != null) {
+            $.map(selectedMes, function (item) {
+                _mesesArr.push(item);
+            });
+            var _meses = _mesesArr.join(",");
+        }
+
+        var _semArr = [];
+        var _semanas = "";
+        if (selectedSemana != null) {
+            $.map(selectedSemana, function (item) {
+                _semArr.push(item);
+            });
+            var _semanas = _semArr.join(",");
+        }
+
+        //if (selectedSemana != null && selectedSemana != '') {
+        $.getJSON('@Url.Action("JSON_GetParamReporteOpe")', { cod_unidad_negocio: selectedUnidad, anio: _anios, mes: _meses, semana: _semanas }, function (data) {
+
+                ddlSelect = $('#ddlDia');
+                ddlSelect.empty();
+                $.each(data.ddlDia, function (index, item) {
+                    ddlSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        //selected: item.Selected
+                    }));
+                });
+                ddlSelect.prop('selectedIndex', -1)
+
+            });
+        //}
+    });
+
+});
+
+    var _fontSize = 11;
+    var _fontSizeTitle = 20;
+    var _colorReal = "#006cc9";
+    var _colorPpto = "#00fe08";
+
+    var url = '@Url.Action("_TableroControl", "KOP")';
+    $('#btnProcesar').click(function () {
+        $("#overlay").show();
+        //$("#pControl").hide();
+        var _unidad = $('#ddlUnidad').val();
+        var _anio = $('#ddlAnio').val();
+        var _mes = $('#ddlMes').val();
+        var _semana = $('#ddlSemana').val();
+        var _dia = $('#ddlDia').val();
+
+        var _aniosArr = [];
+        var _anios = "";
+        if (_anio != null) {
+            $.map(_anio, function (item) {
+                _aniosArr.push(item);
+            });
+            var _anios = _aniosArr.join(",");
+        }
+
+        var _mesesArr = [];
+        var _meses = "";
+        if (_mes != null) {
+            $.map(_mes, function (item) {
+                _mesesArr.push(item);
+            });
+            var _meses = _mesesArr.join(",");
+        }
+        
+        var _semArr = [];
+        var _semanas = "";
+        if (_semana != null) {
+            $.map(_semana, function (item) {
+                _semArr.push(item);
+            });
+            var _semanas = _semArr.join(",");
+        }
+
+        var _diaArr = [];
+        var _dias = "";
+        if (_dia != null) {
+            $.map(_dia, function (item) {
+                _diaArr.push(item);
+            });
+            var _dias = _diaArr.join(",");
+        }
+
+        $.getJSON('@Url.Action("JSON_GetReporteOperativo")', { cod_unidad_negocio: _unidad, anio: _anios, mes: _meses, semana: _semanas, dia: _dias  }, function (data) {
+
+            var indicadores = data.map(function (item) { return item.cod_indicador; }).unique();
+            var cad = '<div class="row">';
+            var cc = 0;
+            $.each(indicadores, function (key, value) {
+                cad = cad + '<div class="col-md-6"><canvas id="canvas' + key + '"></canvas></div>';
+                cc++;
+                if (key != (indicadores.length - 1) && cc == 2) {
+                    cc = 0;
+                    cad = cad + '</div><hr/><div class="row">';
+                }
+
+            });
+            cad = cad + '</div>'
+            $("#reporte").empty();
+            $("#reporte").append(cad);
+
+            var _titulo = data[0]["titulo"];
+            $("#titulo").text(_titulo);
+
+            $.each(indicadores, function (key, value) {
+
+                var array_ind = data.filter(function (f) { return f.cod_indicador == value });
+                var _etiqueta = data.filter(function (f) { return f.cod_indicador == value })[0]["etiqueta"];
+
+
+                var array_real = array_ind.map(function (item) { return item.Real; });
+                var array_plan = array_ind.map(function (item) { return item.Ppto; });
+                var array_axis = array_ind.map(function (item) { return item.fecha; });
+
+                var _maximo = data.filter(function (f) { return f.cod_indicador == value })[0]["Maximo"];
+                var _stepSize = data.filter(function (f) { return f.cod_indicador == value })[0]["step"];
+                var _decimales = data.filter(function (f) { return f.cod_indicador == value })[0]["decimales"];
+                //var _maximoReal = data.filter(function (f) { return f.cod_indicador == value })[0]["mReal"];
+                //var _maximoPpto = data.filter(function (f) { return f.cod_indicador == value })[0]["mPpto"];
+
+                var _unidad = data.filter(function (f) { return f.cod_indicador == value })[0]["unidad"];
+                var _labelString = "Toneladas";
+                if (_unidad == "%")
+                    _labelString = "Ley";
+
+                var barChartData = {
+                    labels: array_axis,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Ppto',
+                            backgroundColor: _colorPpto,
+                            //yAxisID: "bar-y-axis",
+                            fill: false,
+                            showLine: true,
+                            lineTension: 0,
+                            data: array_plan,
+                            //borderDash: [9, 4],
+                            borderColor: _colorPpto,
+                            borderWidth: 4,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 1,
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Real',
+                            backgroundColor: _colorReal,
+                            fill: false,
+                            showLine: true,
+                            lineTension: 0,
+                            data: array_real,
+                            //borderColor: '#749DBF',
+                            //borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: 1,
+                        },
+
+                    ]
+                };
+
+                var ctx = document.getElementById("canvas"+ key).getContext("2d");
+                window.myBar = new Chart(ctx, {
+                    type: 'bar',
+                    data: barChartData,
+                    options: {
+                        title: {
+                            display: true,
+                            text: _etiqueta,
+                            position: "top",
+                            fontSize: _fontSizeTitle,
+                        },
+                        /*tooltips: {
+                          mode: 'label' ,
+                        }, */
+                        /*responsive: true,*/
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'middle',
+                            labels: {
+                                //fontColor: "white",
+                                fontSize: _fontSize,
+                                //boxWidth: 20,
+                                //padding: 20
+                            }
+                        },
+                        scales: {
+                            xAxes: [
+                                {
+                                    ticks: {
+                                        autoSkip: true,
+                                        //maxTicksLimit: 6,
+                                        maxRotation: 90,
+                                        minRotation: 90,
+                                        fontSize: _fontSize,
+                                    },
+
+                                }
+                            ],
+
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        min: 0,
+                                        max: _maximo,
+                                        stepSize: _stepSize,
+                                        callback: function (value) {
+                                            if (_unidad == "%") {
+                                                var per = (value * 100).toFixed(_decimales);
+                                                return per + "%"
+                                            }
+                                            return value;
+                                        },
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: _labelString,
+                                    },
+                                },
+                            ]
+                        },
+
+                        cutoutPercentage: 85,
+                    }
+                });
+
+            });
+
+            $("#overlay").hide();
+
+        });
+
+    })
+    $('#btnControles').click(function () {
+        if ($("#pControl").is(":visible") == true) {
+            $("#pControl").hide();
+        } else {
+            $("#pControl").show();
+        }
+
+    })
+
+        </script>
+    }

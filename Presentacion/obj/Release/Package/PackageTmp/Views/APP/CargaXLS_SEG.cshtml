@@ -1,0 +1,362 @@
+﻿@{
+    ViewBag.Title = "CargaXLS_SEG";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/plugins/purify.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/plugins/sortable.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/uploaders/fileinput/fileinput.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/pages/uploader_bootstrap.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+
+<link href="~/Scripts/datepicker/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/datepicker/bootstrap-datepicker.es.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- Basic modal -->
+<div id="modal_default" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal" id="BtnCancelar">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="BtnAceptar">Aceptar</button>
+                <label id="lblId" class="hidden"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Carga Excel Seguridad</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Bootstrap file input -->
+        <div class="panel panel-flat">
+            <div class="panel-body">
+                <p id="pPanel" class="content-group">Proceso que permite cargar el contenido de una hoja excel al sistema. Debe respetarse el formato acorde con la configuración de la plantilla y la hoja de contenido debe llamarse <code> Seguridad</code></p>
+                <form id="FormUpload" class="form-horizontal" enctype="multipart/form-data">
+                    <label id="lblNomenclatura" class="hidden"></label>
+                    <label id="lblArchivoFisico" class="hidden"></label>
+                    <label id="lblArchivoLogico" class="hidden"></label>
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label text-semibold">Archivo Excel:</label>
+                        <div class="col-lg-10">
+                            <input type="file" name="file" id="txtUploadFile" class="file-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ddlFrecuencia" class="col-lg-2 control-label text-semibold">Frecuencia:</label>
+                        <div class="col-md-2">
+                            <select class="form-control" name="ddlFrecuencia" id="ddlFrecuencia" disabled>
+                                <option value="D" >Diario</option>
+                                <option value="M" selected="selected">Mensual</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label text-semibold">Fecha:</label>
+                        <div class="col-lg-5">
+                            <div class="input-group date col-md-6">
+                                <input type="text" class="form-control" id="dpFecInforme" value="" readonly />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="divAlert" class="alert alert-danger alert-styled-left alert-bordered hidden"></div>
+            </div>
+        </div>
+        <!-- /basic layout -->
+        <!-- /vertical form options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+
+    var fn_yesterday = function (date1) {
+        var dt = new Date(date1);
+        return new Date((dt.setDate(dt.getDate() - 1))).toString();
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+    function formatDate2(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month].join('-');
+    }
+
+    var today = new Date();
+    var yesterday = fn_yesterday(today)
+    var yesterdayFormat = formatDate(yesterday);
+
+    if ($("#ddlFrecuencia option:selected").val() == "M") {
+        $('#dpFecInforme').datepicker('destroy');
+        $('#dpFecInforme').datepicker({
+            pickTime: false,
+            autoclose: true,
+            language: 'es',
+            format: 'yyyy-mm',
+            maxViewMode: 2,
+            minViewMode: 1,
+            startView: 1,
+        });
+        var fec = $('#dpFecInforme').val()
+        fec = fec.replace("-", "/")
+        var date = new Date(fec);
+        var dateFormat = formatDate2(date);
+        $("#dpFecInforme").datepicker("update", dateFormat);
+    }
+    if ($("#ddlFrecuencia option:selected").val() == "D") {
+        $('#dpFecInforme').datepicker('destroy');
+        $('#dpFecInforme').datepicker({
+            pickTime: false,
+            autoclose: true,
+            language: 'es',
+            format: 'yyyy-mm-dd',
+            maxViewMode: 2,
+            minViewMode: 0,
+            startView: 0,
+        });
+        var fec = $('#dpFecInforme').val() + '-01';
+        fec = fec.replace("-", "/")
+        var date = new Date(fec);
+        var dateFormat = formatDate(date);
+        $("#dpFecInforme").datepicker("update", dateFormat);
+    }
+
+    $('#ddlFrecuencia').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true,
+        minimumResultsForSearch: -1,
+    }); 
+
+    $("#ddlFrecuencia").on("change", function () {
+        if ($("#ddlFrecuencia option:selected").val() == "M") {
+            $('#dpFecInforme').datepicker('destroy');
+            $('#dpFecInforme').datepicker({
+                pickTime: false,
+                autoclose: true,
+                language: 'es',
+                format: 'yyyy-mm',
+                maxViewMode: 2,
+                minViewMode: 1,
+                startView: 1,
+            });
+            var fec = $('#dpFecInforme').val()
+            fec = fec.replace("-", "/")
+            var date = new Date(fec);
+            var dateFormat = formatDate2(date);
+            $("#dpFecInforme").datepicker("update", dateFormat);
+        }
+        if ($("#ddlFrecuencia option:selected").val() == "D") {
+            $('#dpFecInforme').datepicker('destroy');
+            $('#dpFecInforme').datepicker({
+                pickTime: false,
+                autoclose: true,
+                language: 'es',
+                format: 'yyyy-mm-dd',
+                maxViewMode: 2,
+                minViewMode: 0,
+                startView: 0,
+            });
+            var fec = $('#dpFecInforme').val() + '-01';
+            fec = fec.replace("-","/")
+            var date = new Date(fec);
+            var dateFormat = formatDate(date);
+            $("#dpFecInforme").datepicker("update", dateFormat);
+        }
+    });
+</script>
+
+@section Styles{
+    <style>
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+        /*.ui-datepicker-calendar {
+            display: none;
+        }*/
+    </style>
+}
+
+@section Scripts {
+    <script>
+$(function () {  
+
+    var FormUpload = $('#FormUpload').validate({
+        submitHandler: function (form, e) {
+            $("#overlay").show();
+            $("#FormUpload").hide();
+            $("#divAlert").empty();
+            $("#divAlert").addClass("hidden");
+            $("#pPanel").text('Procesando información...');
+            var fecInforme = $("#dpFecInforme").val(); //$("#dpFecInforme").datepicker('getDate').val();
+            var cod_frecuencia = $("#ddlFrecuencia option:selected").val(); //"M";
+
+            var files = document.getElementById('txtUploadFile').files;
+            if (files.length > 0) {
+               if (window.FormData !== undefined) {
+                   var dataForm = new FormData();
+                   for (var x = 0; x < files.length; x++){
+                       dataForm.append("file" + x, files[x]);
+                   }
+                   $.ajax({
+                       type: "POST",
+                       url: '@Url.Content("~")' + 'APP/UploadFileAjax?accion=CARGA&fec_informe=' + fecInforme + '&cod_frecuencia=' + cod_frecuencia + '&tipo=SEG',
+                       contentType: false,
+                       processData: false,
+                       data: dataForm,
+                       success: function(data) {
+                           if (data.Status === 200) {
+                               $("#overlay").hide();
+                               toastr.success(data.Message);
+                               $("#pPanel").text('Proceso Concluido');
+                           } else if (data.Status === 400) {
+                               if (data.Kind == "WARNING") {
+                                   $("#overlay").hide();
+                                   $('#modal_default').modal('toggle');
+                                   $("#pComentario").text(data.Message);
+                                   $("#lblId").text(data.Id);
+                                   $("#lblNomenclatura").text(data.Aux);
+                                   $("#lblArchivoFisico").text(data.Aux2);
+                                   $("#lblArchivoLogico").text(data.Aux3);
+                               } else {
+                                   $("#overlay").hide();
+                                   $("#divAlert").removeClass("hidden");
+                                   $("#divAlert").text('');
+                                   $("#divAlert").append('<button type="button" class="close" data-dismiss="alert"><span>&times;</span><span class="sr-only">Close</span></button>' + data.Message);
+                                   $("#pPanel").text('Procesando concluido con errores');
+                                   $("#FormUpload").show();
+                               }
+                           } else {
+                               $("#overlay").hide();
+                               $("#divAlert").removeClass("hidden");
+                               $("#divAlert").text('');
+                               $("#divAlert").append('<button type="button" class="close" data-dismiss="alert"><span>&times;</span><span class="sr-only">Close</span></button>' + data.Message);
+                               //$("#FormUpload").show();
+                           }
+                       },
+                       error: function (xhr, status, p3, p4){
+                           var err = "Error " + " " + status + " " + p3 + " " + p4;
+                           if (xhr.responseText && xhr.responseText[0] == "{")
+                               err = JSON.parse(xhr.responseText).Message;
+                               console.log(err);
+                       }
+                   });
+               } else {
+                    alert("This browser doesn't support HTML5 file uploads!");
+               }
+            }
+        }
+    });
+
+
+    $("#BtnAceptar").on("click", function () {
+        $("#overlay").show();
+        $('#modal_default').modal('toggle');
+        $("#BtnAceptar").prop("disabled", true);
+        $("#BtnCancelar").prop("disabled", true);
+        $("#pComentario").text("Procesando...");
+        //$("#BAL_BatchDataTable").hide();
+
+        var _ide_carga = $("#lblId").text();
+        var _nomenclatura = $("#lblNomenclatura").text();
+        var _fecInforme = $("#dpFecInforme").val();
+        var _fecInformeHasta = $("#dpFecInformeHasta").val();
+        var _archivoFisico = $("#lblArchivoFisico").text();
+        var _archivoLogico = $("#lblArchivoLogico").text();
+        var cod_frecuencia = $("#ddlFrecuencia option:selected").val(); //"M";
+
+        $.post('@Url.Action("ProcesarFileAjax")', { accion: 'DETALLE', nomenclatura: _nomenclatura, fec_informe: _fecInforme, cod_frecuencia: cod_frecuencia, tipo: 'SEG' }, function (data) {
+            if (data.Status === 200) {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                $("#pPanel").text('Proceso Concluido');
+                toastr.success(data.Message);
+            } else if (data.Status === 400) {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                toastr.error(data.Message);
+            } else {
+                $("#BtnAceptar").prop("disabled", false);
+                $("#BtnCancelar").prop("disabled", false);
+                $("#pComentario").text("");
+                //$('#modal_default').modal('toggle');
+                $("#overlay").hide();
+                toastr.warning(data.Message);
+            }
+        });
+
+    });
+
+});
+
+    </script>
+}

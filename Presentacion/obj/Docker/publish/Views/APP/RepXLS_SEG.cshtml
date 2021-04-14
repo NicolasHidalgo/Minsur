@@ -1,0 +1,538 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "RepXLS_SEG";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link href="~/Scripts/datepicker/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/datepicker/bootstrap-datepicker.es.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script src="~/Scripts/numeral/numeral.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+@*<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar:</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Consulta Carga Seguridad</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                @*<li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="ddlTipoFilter" class="col-form-label">Unidad</label>
+                        @Html.DropDownList("ddlUnidadFilter", Model.Unidades, new { @data_placeholder = "Unidad", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlGrupoFilter" class="col-form-label">Grupo</label>
+                        <select id="ddlGrupoFilter" class="select">
+                            <option value="*">TODOS LOS GRUPOS</option>
+                            <option value="OPERACIONES">OPERACIONES</option>
+                            <option value="PROYECTOS">PROYECTOS</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlTipoFilter" class="col-form-label">Tipo</label>
+                        @Html.DropDownList("ddlTipoFilter", Model.ddlTipo, new { @data_placeholder = "Tipo", @class = "select" })
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        <label for="ddlFrecuenciaFilter" class="col-form-label">Frecuencia</label>
+                        <select class="form-control" name="ddlFrecuencia" id="ddlFrecuenciaFilter">
+                            @*<option value="D" selected="selected">Diario</option>*@
+                            <option value="M" selected="selected">Mensual</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="dpFecha" class="col-form-label">Fecha</label>
+                        <div class="input-group date">
+                            <input type="text" class="form-control" id="dpFecha" value="" readonly />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        <div class="form-group" style="margin-top:32px;text-align:center">
+                            <input class="form-check-input" type="checkbox" name="chkAnual" id="chkAnual">
+                            <label class="form-check-label" for="chkAnual">
+                                Anual?
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="global_filter" class="col-form-label">Buscar</label>
+                        <input class="form-control " id="global_filter" placeholder="Buscar...">
+                    </div>
+
+                </div>
+                
+
+            </div>
+
+            <table id="RepXLSDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+
+    var fn_yesterday = function (date1) {
+        var dt = new Date(date1);
+        return new Date((dt.setDate(dt.getDate() - 1))).toString();
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+    function formatDate2(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month].join('-');
+    }
+
+    var today = new Date();
+    var yesterday = fn_yesterday(today)
+    var yesterdayFormat = formatDate(yesterday);
+    var _cod_mes = formatDate2(today);
+
+    //$('#dpFecha').datepicker({
+    //    pickTime: false,
+    //    autoclose: true,
+    //    language: 'es',
+    //    format: 'yyyy-mm-dd',
+    //    maxViewMode: 2,
+    //    minViewMode: 0,
+    //    startView: 0,
+    //});
+    $('#dpFecha').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'yyyy-mm',
+        maxViewMode: 2,
+        minViewMode: 1,
+        startView: 1,
+    });
+
+    $("#dpFecha").datepicker("update", _cod_mes);
+
+    $("#ddlFrecuenciaFilter").on("change", function () {
+        if ($("#ddlFrecuenciaFilter option:selected").val() == "M") {
+            $('#dpFecha').datepicker('destroy');
+
+            var fec = $('#dpFecha').val()
+            fec = fec.replace("-", "/")
+            var date = new Date(fec);
+            var dateFormat = formatDate2(date);
+            $("#dpFecha").val(dateFormat);
+
+            $('#dpFecha').datepicker({
+                pickTime: false,
+                autoclose: true,
+                language: 'es',
+                format: 'yyyy-mm',
+                maxViewMode: 2,
+                minViewMode: 1,
+                startView: 1,
+            });
+            
+            //$("#dpFecha").datepicker("update", dateFormat);
+        }
+        if ($("#ddlFrecuenciaFilter option:selected").val() == "D") {
+            $('#dpFecha').datepicker('destroy');
+
+            var fec = $('#dpFecha').val() + '-01';
+            fec = fec.replace("-", "/")
+            var date = new Date(fec);
+            var dateFormat = formatDate(date);
+            $("#dpFecha").val(dateFormat);
+
+            $('#dpFecha').datepicker({
+                pickTime: false,
+                autoclose: true,
+                language: 'es',
+                format: 'yyyy-mm-dd',   
+                maxViewMode: 2,
+                minViewMode: 0,
+                startView: 0,
+            });
+            
+            //$("#dpFecha").datepicker("update", dateFormat);
+        }
+    });
+</script>
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}   
+
+@section Scripts{
+
+<script>
+
+$(function () {
+    $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+})
+$(function () {
+
+    $('#ddlIndicador').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+    $('#ddlFrecuenciaFilter').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: false,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+    var isAnual = $('#chkAnual').is(":checked");
+    var accion = "XLS_SEG";
+   
+    var RepXLSDataTable = $('#RepXLSDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+        pageLength: this.all,
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                messageTop: null,
+                title: '',
+                filename: 'Seguridad'
+            },
+        ],
+
+        ajax: {
+            url: urls.APPApi.GetDataTable_RepXLS(),
+            type: 'GET',
+            data: function (data) {
+
+                CodFrecuencia = $('#ddlFrecuenciaFilter option:selected').val();
+                var fecha = $("#dpFecha").val();
+                var periodo = 0
+
+                if (CodFrecuencia == "M") {
+                    periodo = fecha.replace('-', '');
+                }
+                if (CodFrecuencia == "D") {
+                    fecha = fecha.replace('-', '');
+                    fecha = fecha.replace('-', '');
+                    periodo = fecha.substring(2, fecha.length);
+                }
+                
+
+                isAnual = $('#chkAnual').is(":checked");
+                accion = "XLS_SEG";
+                if (isAnual == true)
+                    accion += "_ANUAL";       
+                
+                var _filter = {
+                    search: $('#global_filter option:selected').val(),
+                    grupo: $('#ddlGrupoFilter option:selected').val(),
+                    tipo: $('#ddlTipoFilter option:selected').val(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                    cod_frecuencia: CodFrecuencia,
+                    cod_rango_fecha: periodo,
+                    accion: accion
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Unidad',
+            data: 'nom_unidad_negocio',
+            name: 'nom_unidad_negocio',
+            className: 'nom_unidad_negocio',
+            responsivePriority: 1,
+            width: '10%',
+        },
+        {
+            title: 'Grupo',
+            data: 'grupo',
+            name: 'grupo',
+            className: 'grupo',
+            width: '10%',
+        },
+        {
+            title: 'Tipo',
+            data: 'tipo',
+            name: 'tipo',
+            className: 'tipo text-center',
+            width: '5%',
+        },
+        {
+            title: 'Indicador',
+            data: 'descripcion',
+            name: 'descripcion',
+            className: 'descripcion',
+            width: '20%',
+        },
+        {
+            title: 'UM',
+            data: 'unidad',
+            name: 'unidad',
+            className: 'unidad text-center',
+            width: '5%',
+        },
+        {
+            title: 'Periodo',
+            data: 'cod_rango_fecha',
+            name: 'cod_rango_fecha',
+            className: 'cod_rango_fecha text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    //if ($('#chkAnual').is(":checked")) {
+                    //    return formatPeriodo(data);
+                    //} else {
+                    //    return formatPeriodo2(data);
+                    //}
+                    //if ($('#ddlFrecuenciaFilter option:selected').val() == "D") {
+                    //    return formatPeriodo2(data);
+                    //}
+                    //if ($('#ddlFrecuenciaFilter option:selected').val() == "M") {
+                    //    return formatPeriodo(data);
+                    //}
+                    return formatPeriodo2(data);
+                }
+                return '-';
+            },
+            width: '10%',
+        },
+        {
+            title: 'REAL',
+            data: 'real',
+            name: 'real',
+            className: 'real text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return numeral(data).format(full.formato);
+                }
+                return '-';
+            },
+            width: '5%',
+        },
+        {
+            title: 'PLAN',
+            data: 'ppto',
+            name: 'ppto',
+            className: 'ppto text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return numeral(data).format(full.formato);
+                }
+                return '-';
+            },
+            width: '5%',
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#RepXLSDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        RepXLSDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        RepXLSDataTable.draw();
+    });
+    $('#ddlUnidadFilter,#ddlGrupoFilter,#ddlTipoFilter,#chkAnual').on('change', function () {
+        RepXLSDataTable.draw();
+    });
+    $('#dpFecha').on('change', function () {
+        //if ($('dpFecha').data('datepicker') != null) {// or $('#user-date').data('datepicker')==null
+            RepXLSDataTable.draw();
+        //}   
+    });
+
+
+});
+
+function formatPeriodo(codRangoFecha) {
+    var retval = codRangoFecha;
+    if (codRangoFecha.toString().length == 6) {
+        var periodo = codRangoFecha.toString().substring(0, 4);
+        var mes = codRangoFecha.toString().substring(codRangoFecha.toString().length, 4);
+        retval = periodo + "-" + mes;
+        return retval;
+    }
+    return retval;
+}
+function formatPeriodo2(codRangoFecha) {
+    var retval = codRangoFecha;
+    if (codRangoFecha.toString().length == 6) {
+        var periodo = codRangoFecha.toString().substring(0, 2);
+        var mes = codRangoFecha.toString().substring(codRangoFecha.toString().length - 2, 2);
+        var dia = codRangoFecha.toString().substring(codRangoFecha.toString().length, 4);
+        retval = '20' + periodo + "-" + mes + '-' + dia;
+        return retval;
+    }
+    return retval;
+}
+
+    </script>
+}

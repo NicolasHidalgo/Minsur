@@ -1,0 +1,295 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "GenerarMovimiento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+<!-- /theme JS files -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-printer position-left"></i> Movimiento Informe</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div id="pControl" class="panel panel-flat">
+
+            <div class="panel-body">
+                <div class="col-md-12" style="margin-bottom:-12px;">
+                    <div class="form-group col-md-2">
+                        <label for="ddlUnidad">Unidad:</label>
+                        @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlFrecuencia">Frecuencia:</label>
+                        @Html.DropDownList("ddlFrecuencia", Model.Frecuencias, new { @data_placeholder = "Frecuencias", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlPeriodo">Año:</label>
+                        @Html.DropDownList("ddlPeriodo", Model.Periodos, new { @data_placeholder = "Periodos", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="ddlMes">Mes:</label>
+                        @Html.DropDownList("ddlMes", Model.Periodos, new { @data_placeholder = "Meses", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="ddlFecha">Período:</label>
+                        @Html.DropDownList("ddlFecha", Model.Periodos, new { @data_placeholder = "Fechas", @class = "select" })
+                    </div>
+
+                    <div class="form-group col-md-1" style="margin-top:25px;">
+                        <a id="btnGenerar" class="btn btn-primary">Generar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page length options -->
+        <div id="reportView" class="img-fluid">
+            @*Aquí va el ReportView*@
+        </div>
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+
+@section Scripts{
+    <script>
+$(function () {
+    var selectedUnidad = $('#ddlUnidad').val();
+
+    if (selectedUnidad != null && selectedUnidad != '') {
+        $.getJSON('@Url.Action("JSON_GetPanelPorUnidad")', { cod_unidad_negocio: selectedUnidad }, function (data) {
+
+            var frecuenciasSelect = $('#ddlFrecuencia');
+            frecuenciasSelect.empty();
+            $.each(data.Frecuencias, function (index, item) {
+                frecuenciasSelect.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+
+            var periodosSelect = $('#ddlPeriodo');
+            periodosSelect.empty();
+            $.each(data.Periodos, function (index, item) {
+                periodosSelect.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+
+            var mesesSelect = $('#ddlMes');
+            mesesSelect.empty();
+            $.each(data.Meses, function (index, item) {
+                mesesSelect.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+
+            var fechasSelect = $('#ddlFecha');
+            fechasSelect.empty();
+            $.each(data.Fechas, function (index, item) {
+                fechasSelect.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+        });
+    }
+
+    $('#ddlUnidad').change(function () {
+        var selectedUnidad = $(this).val();
+        if (selectedUnidad != null && selectedUnidad != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorUnidad")', { cod_unidad_negocio: selectedUnidad }, function (data) {
+                var frecuenciasSelect = $('#ddlFrecuencia');
+                frecuenciasSelect.empty();
+                $.each(data.Frecuencias, function (index, item) {
+                    frecuenciasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var periodosSelect = $('#ddlPeriodo');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var mesesSelect = $('#ddlMes');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+
+    $('#ddlFrecuencia').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $(this).val();
+        if (selectedFrecuencia != null && selectedFrecuencia != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorFrecuencia")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia }, function (data) {
+                var periodosSelect = $('#ddlPeriodo');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var mesesSelect = $('#ddlMes');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+    $('#ddlPeriodo').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedPeriodo = $(this).val();
+        if (selectedPeriodo != null && selectedPeriodo != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorPeriodo")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo }, function (data) {
+                var mesesSelect = $('#ddlMes');
+                mesesSelect.empty();
+                $.each(data.Meses, function (index, item) {
+                    mesesSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+    $('#ddlMes').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedPeriodo = $("#ddlPeriodo").val();
+        var selectedMes = $(this).val();
+        if (selectedMes != null && selectedMes != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorMes")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo, mes: selectedMes }, function (data) {
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+});
+
+    $("#btnGenerar").click(function () {
+        $("#overlay").show();
+        var _aprobacion = {
+            cod_unidad_negocio: $('#ddlUnidad').val(),
+            cod_frecuencia: $('#ddlFrecuencia').val(),
+            cod_rango_fecha: $('#ddlFecha option:selected').val()
+        };
+        var _url = '@Url.Action("GenerarMovimiento", "KOP")';
+
+        $.post(_url, _aprobacion).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                //$('#modal_default').modal('toggle');
+                toastr.success(data.Message);
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    </script>
+}

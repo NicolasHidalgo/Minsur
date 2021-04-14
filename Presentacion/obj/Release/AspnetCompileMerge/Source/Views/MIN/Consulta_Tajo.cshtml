@@ -1,0 +1,621 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Consulta_Tajo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar por Nombre Tajo</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="showid" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormTajo">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtCodTajo" class="col-form-label">Cód. Tajo</label>
+                            <input type="text" class="form-control" id="txtCodTajo" name="txtCodTajo">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtNomTajo" class="col-form-label">Nombre Tajo</label>
+                            <input type="text" class="form-control" id="txtNomTajo" name="txtNomTajo">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtCodTajoInterno" class="col-form-label">Cód. Tajo Interno</label>
+                            <input type="text" class="form-control" id="txtCodTajoInterno" name="txtCodTajoInterno">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="ddlTipTajo" class="col-form-label">Tipo Tajo</label>
+                            <select class="form-control" name="ddlTipTajo" id="ddlTipTajo"></select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlEstructura" class="col-form-label">Estructura</label>
+                            <select class="form-control" name="ddlEstructura" id="ddlEstructura"></select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlFase" class="col-form-label">Fase</label>
+                            <select class="form-control" name="ddlFase" id="ddlFase">
+                                <option value=""></option>
+                                <option value="Exploración">Exploración</option>
+                                <option value="Preparación">Preparación</option>
+                                <option value="Explotación">Explotación</option>
+                                <option value="Desarrollo">Desarrollo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="col-form-label">Fecha Inicio:</label>
+                            <div class="input-group date">
+                                <input type="text" class="form-control" id="dpFecInicio" value="" readonly />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="col-form-label">Fecha Fin:</label>
+                            <div class="input-group date">
+                                <input type="text" class="form-control" id="dpFecFin" value="" readonly />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            <label for="ddlTipMineral" class="col-form-label">Tipo Mineral</label>
+                            <select class="form-control" name="ddlTipMineral" id="ddlTipMineral"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodTajoOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Tajos</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                <li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            @*<div class="panel-heading">
+                    <h5 class="panel-title">Basic datatable</h5>
+                    <div class="heading-elements">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse"></a></li>
+                            <li><a data-action="reload"></a></li>
+                            <li><a data-action="close"></a></li>
+                        </ul>
+                    </div>
+                </div>*@
+
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="ddlEstructuraFilter" class="col-form-label">Estructuras</label>
+                    @Html.DropDownList("ddlEstructuraFilter", Model.DropDownList, new { @data_placeholder = "Estructuras" })
+                </div>
+            </div>
+
+            <table id="TajoDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+ <script>
+$(function () {
+    
+    $('#dpFecInicio').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy'
+    });
+
+    $('#dpFecFin').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy',
+    });
+
+    $('#ddlEstructuraFilter').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+
+    var TajoDataTable = $('#TajoDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.MINApi.GetDataTable_Tajo(),
+            type: 'GET',
+            data: function (data) {
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_unidad_negocio: $('#lblCodUnidadNegocio').text(),
+                    cod_tajo_estructura: $('#ddlEstructuraFilter option:selected').val()
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Cód. Tajo',
+            data: 'cod_tajo',
+            name: 'cod_tajo',
+            className: 'cod_tajo',
+            responsivePriority: 1
+        },
+        {
+            title: 'Cód. Tajo Tipo',
+            data: 'cod_tajo_tipo',
+            name: 'cod_tajo_tipo',
+            className: 'cod_tajo_tipo'
+        },
+        {
+            title: 'Cód. Tajo Interno',
+            data: 'cod_tajo_interno',
+            name: 'cod_tajo_interno',
+            className: 'cod_tajo_interno'
+        },
+        {
+            title: 'Tajo Tipo',
+            data: 'nom_tajo_tipo',
+            name: 'nom_tajo_tipo',
+            className: 'nom_tajo_tipo'
+        },
+        {
+            title: 'Cód. Estructura',
+            data: 'cod_tajo_estructura',
+            name: 'cod_tajo_estructura',
+            className: 'cod_tajo_estructura'
+        },
+        {
+            title: 'Estructura',
+            data: 'nom_tajo_estructura',
+            name: 'nom_tajo_estructura',
+            className: 'nom_tajo_estructura'
+        },
+        {
+            title: 'Nombre Tajo',
+            data: 'nom_tajo',
+            name: 'nom_tajo',
+            className: 'nom_tajo'
+        },
+        {
+            title: 'Fec. Inicio',
+            data: 'fec_inicio',
+            name: 'fec_inicio',
+            className: 'fec_inicio text-center',
+            render: function (data, tye, full, meta) {
+                if (data != null) {
+                    return moment(data).format('DD/MM/YYYY');
+                }
+                return '-';
+            }
+        },
+        {
+            title: 'Fec. Fin',
+            data: 'fec_fin',
+            name: 'fec_fin',
+            className: 'fec_fin text-center',
+            render: function (data, type, full, meta) {
+                if (data != null) {
+                    return moment(data).format('DD/MM/YYYY');
+                }
+                return '-';
+            }
+        },
+        {
+            title: 'Fase',
+            data: 'fase',
+            name: 'fase',
+            className: 'fase'
+        },
+        {
+            title: 'Mineral',
+            data: 'tip_mineral',
+            name: 'tip_mineral',
+            className: 'tip_mineral'
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.cod_tajo + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-id="' + full.cod_tajo + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#TajoDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        TajoDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        TajoDataTable.draw();
+    });
+    $('#ddlEstructuraFilter').on('change', function () {
+        TajoDataTable.draw();
+    });
+
+
+     var codValidator = $('#FormTajo').validate({
+        rules: {
+            txtCodTajoInterno: {
+                required: true
+            },
+            ddlTipTajo: {
+                required: true
+            },
+            ddlEstructura: {
+                required: true
+            },
+            dpFecInicio: {
+                required: true
+            },
+            dpFecFin: {
+                required: true
+            },
+            ddlFase: {
+                required: true
+            }
+        },
+        messages: {
+            txtCodTajoInterno: {
+                required: 'Ingrese Cód Tajo Interno'
+            },
+            ddlTipTajo: {
+                required: 'Seleccione un tipo de tajo'
+            },
+            ddlEstructura: {
+                required: 'Seleccione una estructura'
+            },
+            dpFecInicio: {
+                required: 'Seleccione una fecha inicio'
+            },
+            dpFecFin: {
+                required: 'Seleccione una fecha fin'
+            },
+            ddlFase: {
+                required: 'Seleccione una fase'
+            }
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            var _tajo = {
+                cod_tajo: $('#lblCodTajoOrigen').val(),
+                cod_tajo_tipo: $('#ddlTipTajo option:selected').val(),
+                nom_tajo_tipo: $('#ddlTipTajo option:selected').text(),
+                cod_tajo_estructura: $('#ddlEstructura option:selected').val(),
+                nom_tajo_estructura: $('#ddlEstructura option:selected').text(),
+                cod_tajo_interno: $('#txtCodTajoInterno').val(),
+                nom_tajo: $('#txtNomTajo').val(),
+                fec_inicio: $('#dpFecInicio').val(),
+                fec_fin: $('#dpFecFin').val(),
+                fase: $('#ddlFase option:selected').text(),
+                tip_mineral: $('#ddlTipMineral option:selected').text(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Tajo", "MIN")';
+
+            $.post(_url, _tajo).done(function (data) {
+                if (data.Status === 200) {
+                    $('#RegistroModal').modal('toggle');
+                    toastr.success(data.Message);
+                    TajoDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+
+    $('#btnEliminar').on('click', function () {
+        var _tajo = {
+            cod_tajo: $("#showid").val()
+        };
+
+        var _url = '@Url.Content("~")'+'MIN/Delete_Tajo'
+
+        $.post(_url, _tajo).done(function (data) {
+            if (data.Status === 200) {
+                $('#ConfirmarModal').modal('toggle');
+                toastr.success(data.Message);
+                TajoDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var idTajo = $(this).data('id');
+        $("#showid").val(idTajo);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#RegistroModal').on('show.bs.modal', function (event) {
+        if (event.relatedTarget === undefined) return; 
+        if (event.namespace === 'bs.modal') { // previene que el datepicker no limpie otros inputs
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            $(".validation-error-label").removeClass("validation-error-label");
+            $(".error").remove();
+
+            var action = button.data('whatever');
+            var titulo = "";
+            var _cod_tajo_estructura = "";
+
+            if (action == 'UPDATE') {
+                titulo = "ACTUALIZAR";
+                $("#txtCodTajo").val(button.closest("tr").find(".cod_tajo").text());
+                $("#txtCodTajo").prop('disabled', true);
+                $("#txtNomTajo").val(button.closest("tr").find(".nom_tajo").text());
+                $("#txtNomTajo").prop('disabled', true);
+                $("#txtCodTajoInterno").val(button.closest("tr").find(".cod_tajo_interno").text());
+                $("#txtCodTajoInterno").prop('disabled', true);
+                $("#ddlTipTajo").prop('disabled', true);
+                $("#ddlEstructura").prop('disabled', true);
+                if (button.closest("tr").find(".fec_inicio").text() == "-") {
+                    $("#dpFecInicio").val('');
+                } else {
+                    $("#dpFecInicio").datepicker("update", button.closest("tr").find(".fec_inicio").text());
+                }
+                if (button.closest("tr").find(".fec_fin").text() == "-") {
+                    $("#dpFecFin").val('');
+                } else {
+                    $("#dpFecFin").datepicker("update", button.closest("tr").find(".fec_fin").text());
+                }
+                
+                $("#ddlFase").val(button.closest("tr").find(".fase").text());
+                _cod_tajo_estructura = button.closest("tr").find(".cod_tajo_estructura").text();
+            } else {
+                titulo = "AGREGAR";
+                $("#txtCodTajo").prop('disabled', true);
+                $("#txtNomTajo").prop('disabled', true);
+                $("#txtCodTajoInterno").prop('disabled', false);
+                $("#ddlTipTajo").prop('disabled', false);
+                $("#ddlEstructura").prop('disabled', true);
+                $("#txtCodTajo").val('');
+                $("#txtNomTajo").val('');
+                $("#txtCodTajoInterno").val('');
+                $("#ddlTipTajo").val('');
+                $("#ddlEstructura").val('');
+                $("#ddlFase").val('');
+                $("#dpFecInicio").val('');
+                $("#dpFecFin").val('');
+                $("#ddlTipMineral").val('');
+                _cod_tajo_estructura = $("#ddlEstructuraFilter option:selected").val();
+            }
+
+            $.getJSON('@Url.Action("JSON_GetDropDownTipoTajo")', { cod_unidad_negocio: '', cod_tajo_tipo: button.closest("tr").find(".cod_tajo_tipo").text() }, function (data) {
+                var select = $('#ddlTipTajo');
+                select.empty();
+                var i = 0;
+                $.each(data, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+            });
+
+            $.getJSON('@Url.Action("JSON_GetDropDownEstructura")', { cod_unidad_negocio: '', cod_tajo_estructura: _cod_tajo_estructura }, function (data) {
+                var select = $('#ddlEstructura');
+                select.empty();
+                var i = 0;
+                $.each(data, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+            });
+
+            $.getJSON('@Url.Action("JSON_GetDropDownTipoMineral")', { cod_unidad_negocio: '', tipMineral: button.closest("tr").find(".tip_mineral").text() }, function (data) {
+                var select = $('#ddlTipMineral');
+                select.empty();
+                var i = 0;
+                $.each(data, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+            });
+
+
+            $("#lblAccion").val(action);
+            $("#lblCodTajoOrigen").val($.trim(button.closest("tr").find(".cod_tajo").text()));
+            var modal = $(this)
+            modal.find('.modal-title').text(titulo)
+            //modal.find('.modal-body input').val(recipient)
+        }
+    });
+
+});
+
+
+    </script>
+}

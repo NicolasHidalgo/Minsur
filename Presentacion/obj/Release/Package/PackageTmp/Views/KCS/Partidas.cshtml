@@ -1,0 +1,1042 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Partidas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/datepicker.css" />
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.es.js"></script>
+
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar Partida</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="lblIdConfirm" />
+                <label id="lblParam01Confirm" />
+                <label id="lblParam02Confirm" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- modal formulario -->
+<div class="modal fade" id="RegistroModal" role="dialog" aria-labelledby="RegistroModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RegistroModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="FormPlantilla">
+                <div class="modal-body">
+
+                    <div class="form-row">
+                        <input type="text" class="form-control hidden" id="txtSecuencia" name="txtSecuencia">
+                        <div class="form-group col-md-4">
+                            <label for="txtCodPartida" class="col-form-label">Cod. Partida</label>
+                            <input type="text" class="form-control" id="txtCodPartida" name="txtCodPartida">
+                        </div>
+                        <div class="form-group col-md-8">
+                            <label for="txtNomPartida" class="col-form-label">Nom. Partida</label>
+                            <input type="text" class="form-control" id="txtNomPartida" name="txtNomPartida">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlCeco" class="col-form-label">Cod. Ceco</label>
+                            @Html.DropDownList("ddlCeco", Model.ddlCeco, new { @data_placeholder = "Ceco", @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group col-md-12">
+                            <label for="ddlArea" class="col-form-label">Area</label>
+                            @Html.DropDownList("ddlArea", Model.ddlArea, "", new { @data_placeholder = "Area", @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlProceso01" class="col-form-label">Proceso 01</label>
+                            @Html.DropDownList("ddlProceso01", Model.ddlProceso01, "", new { @data_placeholder = "Proceso 01", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlProceso02" class="col-form-label">Proceso 02</label>
+                            @Html.DropDownList("ddlProceso02", Model.ddlProceso02, "", new { @data_placeholder = "Proceso 02", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlProceso03" class="col-form-label">Proceso 03</label>
+                            @Html.DropDownList("ddlProceso03", Model.ddlProceso03, "", new { @data_placeholder = "Proceso 03", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div id="divMaterial" class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ddlMaterial" class="col-form-label">Material</label>
+                            @Html.DropDownList("ddlMaterial", Model.ddlMaterial, "", new { @data_placeholder = "Material", @class = "form-control" })
+                        </div>
+                    </div>
+
+                    @*<div class="ui-widget">
+                        <label for="tags">Tags: </label>
+                        <input id="tags">
+                    </div>*@
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aceptar</button>
+                    <label id="lblAccion" />
+                    <label id="lblCodOrigen" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /modal formulario -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Configuracion de Partidas</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+                <li><a data-toggle="modal" data-target="#BuscarModal"><i class="icon-search4 position-left"></i> Buscar</a></li>
+                <li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="CREATE"><i class="icon-plus3"></i> Agregar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            @*<div class="panel-heading">
+                    <h5 class="panel-title">Basic datatable</h5>
+                    <div class="heading-elements">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse"></a></li>
+                            <li><a data-action="reload"></a></li>
+                            <li><a data-action="close"></a></li>
+                        </ul>
+                    </div>
+                </div>*@
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <div class="form-group col-md-1">
+                        <label for="ddlUnidadFilter" class="col-form-label">Unidad</label>
+                        @Html.DropDownList("ddlUnidadFilter", Model.ddlUnidad, new { @data_placeholder = "Unidad", @class = "form-control" })
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label for="ddlPeriodoFilter" class="col-form-label">Periodo</label>
+                        @Html.DropDownList("ddlPeriodoFilter", Model.Periodos, new { @data_placeholder = "Periodo", @class = "form-control" })
+                    </div>
+                    @if (Model.numNivel > 0)
+                    {
+                        <div id="divArea" class="form-group col-md-2">
+                            <label for="ddlAreaFilter" class="col-form-label">Area</label>
+                            @Html.DropDownList("ddlAreaFilter", Model.ddlArea, "" ,new { @data_placeholder = "Area", @class = "form-control" })
+                        </div>
+                    }
+                    @if (Model.numNivel > 1)
+                    {
+                        <div id="divProceso01" class="form-group col-md-2">
+                            <label for="ddlProceso01Filter" class="col-form-label">Proceso 01</label>
+                            @Html.DropDownList("ddlProceso01Filter", Model.ddlProceso01, "", new { @data_placeholder = "Proceso 01", @class = "form-control" })
+                        </div>
+                    }
+                    @if (Model.numNivel > 2)
+                    {
+                        <div id="divProceso02" class="form-group col-md-3">
+                            <label for="ddlProceso02Filter" class="col-form-label">Proceso 02</label>
+                            @Html.DropDownList("ddlProceso02Filter", Model.ddlProceso02, "",  new { @data_placeholder = "Proceso 02", @class = "form-control" })
+                        </div>
+                    }
+                    @if (Model.numNivel > 3)
+                    {
+                        <div id="divProceso03" class="form-group col-md-3">
+                            <label for="ddlProceso03Filter" class="col-form-label">Proceso 03</label>
+                            @Html.DropDownList("ddlProceso03Filter", Model.ddlProceso03, "", new { @data_placeholder = "Proceso 03", @class = "form-control" })
+                        </div>
+                    }
+                    
+                </div>
+            </div>
+
+            <table id="PlantillaDataTable" class="table table-responsive table-bordered table-striped"></table>
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        .datatable-header {
+            display: none;
+        }
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .ui-autocomplete {
+            z-index: 215000000 !important;
+        }
+
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+$(function () {
+    $('#divMaterial').hide();
+
+    $("#ddlMaterial").select2({
+        ajax: {
+            url: function () {
+                return urls.KCSApi.GetMaterialesPorNombre();
+            },
+            dataType: 'json',
+            type: "GET",
+            delay: 250,
+            data: function (params) {
+                var ceco = $("#ddlCeco option:selected").val();
+                if (ceco == "" || ceco == null)
+                    ceco = 0;
+
+                return {
+                    term1: ceco,
+                    term2: params.term,
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.cod_material,
+                            text: item.nom_material,
+                        }
+                    })
+                };
+            },
+            cache: true
+        },
+        templateResult: function (item) {
+            if (item.loading) return item.text;
+            return item.text;
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+        //tags: true, // Esta opcion sirve para que el valor que se escriba aparezca como un select option
+        allowClear:true
+    });
+
+
+    $('#ddlArea,#ddlAreaFilter,#ddlProceso01,#ddlProceso01Filter,#ddlProceso02,#ddlProceso02Filter,#ddlProceso03,#ddlProceso03Filter,#ddlCeco').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+    $('#ddlCeco').on('change', function () {
+        $('#divMaterial').hide();
+        $.getJSON('@Url.Action("JSON_GetCecoMaterial")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_centro_costo: $("#ddlCeco option:selected").val() }, function (data) {
+            if (data.length > 0) {
+                $('#divMaterial').show();
+            }
+        });
+    });
+    
+    $('#ddlUnidadFilter').on('change', function () {
+        if ($('#ddlUnidadFilter').val() == null || $('#ddlUnidadFilter').val() == "") {
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: 0, cod_area: '' }, function (data) {
+
+            var numNivel = data.numNivel;
+            $("#divArea,#divProceso01,#divProceso02,#divProceso03").hide();
+            if (numNivel > 0) {
+                $("#divArea").show();
+            }
+            if (numNivel > 1) {
+                $("#divProceso01").show();
+            }
+            if (numNivel > 2) {
+                $("#divProceso02").show();
+            }
+            if (numNivel > 3) {
+                $("#divProceso03").show();
+            }
+
+            $('#ddlAreaFilter,#ddlProceso01Filter,#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            var select = $('#ddlPeriodoFilter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlPeriodo, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlPeriodo.length) {
+
+                    if (data.ddlArea.length == 0) {
+                        $('#ddlAreaFilter').empty();
+                        $('#ddlProceso01Filter').empty();
+                        $('#ddlProceso02Filter').empty();
+                        $('#ddlProceso03Filter').empty();
+                        $("#overlay").hide();
+                        return;
+                    }
+
+                    select = $('#ddlAreaFilter');
+                    select.empty();
+                    i = 0;
+                    $.each(data.ddlArea, function (index, item) {
+                        i += 1;
+                        select.append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text,
+                            selected: item.Selected
+                        }));
+
+                        if (i == data.ddlArea.length) {
+                            $("#ddlAreaFilter").val("");
+                            $("#overlay").hide();
+                            PlantillaDataTable.draw();
+                            return;
+                        }
+                    })
+                }
+            });
+        });
+    });
+
+    $('#ddlPeriodoFilter').on('change', function () {
+        if ($('#ddlPeriodoFilter').val() == null || $('#ddlPeriodoFilter').val() == "") {
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: '' }, function (data) {
+            $('#ddlAreaFilter,#ddlProceso01Filter,#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            var select = $('#ddlAreaFilter');
+            select.empty();
+            var i = 0;
+
+            $.each(data.ddlArea, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlArea.length) {
+                    $("#ddlAreaFilter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlAreaFilter').on('change', function () {
+        if ($('#ddlAreaFilter').val() == null || $('#ddlAreaFilter').val() == "") {
+            $('#ddlProceso01Filter,#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            PlantillaDataTable.draw();
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlAreaFilter').val() }, function (data) {
+            $('#ddlProceso01Filter,#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            var select = $('#ddlProceso01Filter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso01, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlProceso01.length) {
+                    $("#ddlProceso01Filter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlArea').on('change', function () {
+        if ($('#ddlArea').val() == null || $('#ddlArea').val() == "") {
+            $('#ddlProceso01,#ddlProceso02,#ddlProceso03').empty();
+            return;
+        }
+        $("#overlay2").show();
+        $("#overlay2").appendTo('#RegistroModal');
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlArea').val() }, function (data) {
+            $('#ddlProceso01,#ddlProceso02,#ddlProceso03').empty();
+            var select = $('#ddlProceso01');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso01, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlProceso01.length) {
+                    $("#ddlProceso01").val("");
+                    $("#overlay2").hide();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlProceso01Filter').on('change', function () {
+        if ($('#ddlProceso01Filter').val() == null || $('#ddlProceso01Filter').val() == "") {
+            $('#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            PlantillaDataTable.draw();
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlProceso01Filter').val() }, function (data) {
+            $('#ddlProceso02Filter,#ddlProceso03Filter').empty();
+            var select = $('#ddlProceso02Filter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso02, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlProceso02.length) {
+                    $("#ddlProceso02Filter").val("");
+                    $("#overlay").hide();
+                    PlantillaDataTable.draw();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlProceso01').on('change', function () {
+        if ($('#ddlProceso01').val() == null || $('#ddlProceso01').val() == "") {
+            $('#ddlProceso02,#ddlProceso03').empty();
+            return;
+        }
+        $("#overlay2").show();
+        $("#overlay2").appendTo('#RegistroModal');
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlProceso01').val() }, function (data) {
+            $('#ddlProceso02,#ddlProceso03').empty();
+            var select = $('#ddlProceso02');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso02, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+
+                if (i == data.ddlProceso02.length) {
+                    $("#ddlProceso02").val("");
+                    $("#overlay2").hide();
+                    return;
+                }
+            });
+        });
+    });
+
+    $('#ddlProceso02Filter').on('change', function () {
+        if ($('#ddlProceso02Filter').val() == null || $('#ddlProceso02Filter').val() == "") {
+            $('#ddlProceso03Filter').empty();
+            PlantillaDataTable.draw();
+            return;
+        }
+        $("#global_filter").val('');
+        $("#overlay").show();
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlProceso02Filter').val() }, function (data) {
+            var select = $('#ddlProceso03Filter');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso03, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+            
+            if (i == data.ddlProceso03.length) {
+                $("#ddlProceso03Filter").val("");
+                $("#overlay").hide();   
+                PlantillaDataTable.draw();
+                return;
+            }
+        });
+    });
+
+    $('#ddlProceso02').on('change', function () {
+        if ($('#ddlProceso02').val() == null || $('#ddlProceso02').val() == "") {
+            $('#ddlProceso03').empty();
+            return;
+        }
+        $("#overlay2").show();
+        $("#overlay2").appendTo('#RegistroModal');
+        $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: $('#ddlProceso02').val() }, function (data) {
+            var select = $('#ddlProceso03');
+            select.empty();
+            var i = 0;
+            $.each(data.ddlProceso03, function (index, item) {
+                i += 1;
+                select.append($('<option/>', {
+                    value: item.Value,
+                    text: item.Text,
+                    selected: item.Selected
+                }));
+            });
+            
+            if (i == data.ddlProceso03.length) {
+                $("#ddlProceso03").val("");
+                $("#overlay2").hide();
+                return;
+            }
+        });
+    });
+
+    var PlantillaDataTable = $('#PlantillaDataTable').DataTable({
+        autoWidth: false,
+        responsive: true,
+        searching: false,
+        ordering: false,
+        processing: true,
+        serverSide: true,
+        stateSave: false,
+        lengthChange: false,
+        info: false,
+
+        ajax: {
+            url: urls.KCSApi.GetDataTable_Partida(),
+            type: 'GET',
+            data: function (data) {
+
+                var cod_area = "";
+                if ($('#ddlAreaFilter option:selected').val() != null && $('#ddlAreaFilter option:selected').val() != "") {
+                    cod_area = $('#ddlAreaFilter option:selected').val()
+                }
+                if ($('#ddlProceso01Filter option:selected').val() != null && $('#ddlProceso01Filter option:selected').val() != "") {
+                    cod_area = $('#ddlProceso01Filter option:selected').val()
+                }
+                if ($('#ddlProceso02Filter option:selected').val() != null && $('#ddlProceso02Filter option:selected').val() != "") {
+                    cod_area = $('#ddlProceso02Filter option:selected').val()
+                }
+                if ($('#ddlProceso03Filter option:selected').val() != null && $('#ddlProceso03Filter option:selected').val() != "") {
+                    cod_area = $('#ddlProceso03Filter option:selected').val()
+                }
+
+                var _filter = {
+                    search: $('#global_filter').val(),
+                    cod_area: cod_area,
+                    cod_usuario: $('#lblCodUsuario').text(),
+                    cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                    periodo: $('#ddlPeriodoFilter option:selected').val()
+                };
+
+                var _order = $.map(data.order, function (item) {
+                    return {
+                        Property: data.columns[item.column].name,
+                        Direction: item.dir
+                    };
+                });
+
+                delete data.columns;
+                delete data.order;
+                delete data.search;
+
+                data.filter = _filter;
+                data.orderby = _order;
+            }
+        },
+        columns: [
+        {
+            title: 'Secuencia',
+            data: 'secuencia',
+            name: 'secuencia',
+            className: 'secuencia',
+            responsivePriority: 1,
+            width: "3%"
+        },
+        {
+            title: 'Cod. Area',
+            data: 'cod_area',
+            name: 'cod_area',
+            className: 'cod_area',
+            width: "5%"
+        },
+        {
+            title: 'Area',
+            data: 'area',
+            name: 'area',
+            className: 'area',
+            width: "5%",
+        },
+        {
+            title: 'Proceso 01',
+            data: 'proceso_01',
+            name: 'proceso_01',
+            className: 'proceso_01',
+            width: "10%",
+        },
+        {
+            title: 'Proceso 02',
+            data: 'proceso_02',
+            name: 'proceso_02',
+            className: 'proceso_02',
+            width: "10%",
+        },
+        {
+            title: 'Proceso 03',
+            data: 'proceso_03',
+            name: 'proceso_03',
+            className: 'proceso_03',
+            width: "10%",
+        },
+        {
+            title: 'Cod. Ceco',
+            data: 'cod_centro_costo',
+            name: 'cod_centro_costo',
+            className: 'cod_centro_costo',
+            width: "5%",
+        },
+        {
+            title: 'Nom. Ceco',
+            data: 'nom_centro_costo',
+            name: 'nom_centro_costo',
+            className: 'nom_centro_costo',
+            width: "10%",
+        },
+        {
+            title: 'Cod. Partida',
+            data: 'cod_partida',
+            name: 'cod_partida',
+            className: 'cod_partida',
+            width: "5%",
+        },
+        {
+            title: 'Nom. Partida',
+            data: 'nom_partida',
+            name: 'nom_partida',
+            className: 'nom_partida',
+            width: "10%",
+        },
+        {
+            title: 'Cod. Material',
+            data: 'cod_material',
+            name: 'cod_material',
+            className: 'cod_material',
+            width: "10%",
+        },
+        {
+            title: 'Cod. Material',
+            data: 'nom_material',
+            name: 'nom_material',
+            className: 'nom_material',
+            width: "10%",
+        },
+        {
+            title: "&nbsp;",
+            //orderable: false,
+            width: "5%",
+            render: function (data, type, full, meta) {
+                var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                dropdown += '<li><a data-toggle="modal" data-target="#RegistroModal" data-whatever="UPDATE" data-id="' + full.secuencia + '"><i class="icon-pencil4"></i> Editar</a></li>';
+                dropdown += '<li><a data-toggle="modal" data-target="#ConfirmarModal" class="rowDelete" data-whatever="DELETE" data-param01="' + full.cod_partida + '" data-param02="' + full.cod_area + '" data-id="' + full.secuencia + '"><i class="icon-bin"></i> Eliminar</a></li>';
+                dropdown += '</ul></li></ul>';
+                return dropdown;
+            },
+            responsivePriority: 0
+        }
+        ],
+
+    });
+
+    if (isMobile == false) {
+        $('#PlantillaDataTable').stickyTableHeaders();
+    }
+    $('#btnRefrescar').on('click', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+    $('#btnBuscar').on('click', function () {
+        $('#BuscarModal').modal('show');
+    });
+
+    $('#global_filter').on('keyup click', function () {
+        PlantillaDataTable.draw();
+    });
+
+    $('#ddlProceso03Filter').on('change', function () {
+        $("#global_filter").val('');
+        PlantillaDataTable.draw();
+    });
+
+     var codValidator = $('#FormPlantilla').validate({
+        rules: {
+            txtCodPartida: {
+                required: true
+            },
+            txtNomPartida: {
+                required: true
+            },
+            ddlCeco: {
+                required: true
+            },
+            ddlArea: {
+                required: true
+            },
+            ddlProceso01: {
+                required: true
+            },
+            ddlProceso02: {
+                required: true
+            },
+            ddlProceso03: {
+                required: true
+            },
+        },
+         messages: {
+            txtCodPartida: {
+                required: 'Obligatorio'
+            },
+            txtNomPartida: {
+                required: 'Obligatorio'
+            },
+            ddlCeco: {
+                required: 'Obligatorio'
+            },
+            ddlArea: {
+                required: 'Obligatorio'
+            },
+            ddlArea: {
+                required: 'Obligatorio'
+            },
+            ddlProceso01: {
+                required: 'Obligatorio'
+            },
+            ddlProceso02: {
+                required: 'Obligatorio'
+             },
+            ddlProceso03: {
+                required: 'Obligatorio'
+            },
+        },
+        highlight: function (element) {
+            $(element).parent().addClass('validation-error-label')
+        },
+        unhighlight: function (element) {
+            $(element).parent().removeClass('validation-error-label')
+        },
+
+        submitHandler: function (form, e) {
+            $('#RegistroModal').modal('toggle');
+            $("#overlay").show();
+
+            var cod_area = "";
+            if ($('#ddlArea option:selected').val() != null) {
+                cod_area = $('#ddlArea option:selected').val()
+            }
+            if ($('#ddlProceso01 option:selected').val() != null) {
+                cod_area = $('#ddlProceso01 option:selected').val()
+            }
+            if ($('#ddlProceso02 option:selected').val() != null) {
+                cod_area = $('#ddlProceso02 option:selected').val()
+            }
+            if ($('#ddlProceso03 option:selected').val() != null) {
+                cod_area = $('#ddlProceso03 option:selected').val()
+            }
+
+
+            var _obj = {
+                secuencia: $('#txtSecuencia').val(),
+                cod_centro_costo: $('#ddlCeco option:selected').val(),
+                cod_partida: $('#txtCodPartida').val(),
+                nom_partida: $('#txtNomPartida').val(),
+                cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                periodo: $('#ddlPeriodoFilter option:selected').val(),
+                cod_area: cod_area,
+                cod_material: $('#ddlMaterial option:selected').val(),
+                accion: $("#lblAccion").val()
+            };
+
+            var _url = '@Url.Action("Edit_Partida", "KCS")';
+
+            $.post(_url, _obj).done(function (data) {
+                $("#overlay").hide();
+                if (data.Status === 200) {
+                    toastr.success(data.Message);
+                    PlantillaDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+    $('#btnEliminar').on('click', function () {
+        $('#ConfirmarModal').modal('toggle');
+        $("#overlay").show();
+
+        var _obj = {
+            cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+            periodo: $('#ddlPeriodoFilter option:selected').val(),
+            secuencia: $("#lblIdConfirm").val(),
+            cod_partida: $("#lblParam01Confirm").val(),
+            cod_area: $("#lblParam02Confirm").val(),
+            accion: 'DELETE'
+        };
+
+        var _url = '@Url.Content("~")'+'KCS/Edit_Partida'
+
+        $.post(_url, _obj).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                toastr.success(data.Message);
+                PlantillaDataTable.draw();
+            } else if (data.Status === 400) {
+                toastr.warning(data.Message);
+            } else {
+                toastr.error(data.Message)
+            }
+        }).fail(function (jqXHR, textStatus, err) {
+            $("#overlay").hide();
+            toastr.warning(err);
+        });
+    });
+
+    $(document).on("click", ".rowDelete", function () {
+        var id = $(this).data('id');
+        var param01 = $(this).data('param01');
+        var param02 = $(this).data('param02');
+
+        $("#lblIdConfirm").val(id);
+        $("#lblParam01Confirm").val(param01);
+        $("#lblParam02Confirm").val(param02);
+        document.getElementById('pComentario').innerHTML = 'Está seguro de que desea eliminar este registro?';
+        $('#ConfirmarModal').modal('show');
+    });
+
+    $('#RegistroModal').on('show.bs.modal', function (event) {
+        if (event.relatedTarget === undefined) return;
+        if (event.namespace === 'bs.modal') { // previene que el datepicker no limpie otros inputs
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            $(".validation-error-label").removeClass("validation-error-label");
+            $(".error").remove();
+
+            var action = button.data('whatever');
+            var titulo = "";
+            var _cod_area = "";//$("#ddlProceso03Filter option:selected").val();
+
+            if (action == 'UPDATE') {
+                titulo = "ACTUALIZAR";
+                $("#txtSecuencia").val(button.closest("tr").find(".secuencia").text());
+                $("#txtCodPartida").val(button.closest("tr").find(".cod_partida").text());
+                $("#txtNomPartida").val(button.closest("tr").find(".nom_partida").text());
+                $("#ddlCeco").val(button.closest("tr").find(".cod_centro_costo").text()).change();
+
+                _cod_area = button.closest("tr").find(".cod_area").text();
+                _area = button.closest("tr").find(".cod_area").text().substring(0, 2);
+                _proceso01 = button.closest("tr").find(".cod_area").text().substring(0, 5);
+                _proceso02 = button.closest("tr").find(".cod_area").text().substring(0, 8);
+                _proceso03 = button.closest("tr").find(".cod_area").text().substring(0, 11);
+
+                _codMaterial = button.closest("tr").find(".cod_material").text();
+                _nomMaterial = button.closest("tr").find(".nom_material").text();
+                _material = "[" + _codMaterial + "] " + _nomMaterial
+
+                $('#divMaterial').hide();
+                if (_codMaterial != "") {
+                    $('#divMaterial').show();
+                    $("#ddlMaterial").append('<option value="' + _codMaterial + '" selected>' + _material + '</option>');
+                } else {
+                    $("#ddlMaterial").empty();
+                }
+
+            } else {
+                titulo = "AGREGAR";
+                $('#divMaterial').hide();
+                $("#txtSecuencia").val('');
+                $("#txtCodPartida").val('');
+                $("#txtNomPartida").val('');
+                $("#ddlArea,#ddlCeco,#ddlProceso01,#ddlProceso02,#ddlProceso03,#ddlMaterial").val('').change();
+            }
+
+            $.getJSON('@Url.Action("JSON_GetAreaProceso")', { cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(), periodo: $('#ddlPeriodoFilter option:selected').val(), cod_area: _cod_area }, function (data) {
+                $("#overlay2").appendTo('#RegistroModal');
+                $("#overlay2").show();
+                var select = $('#ddlArea');
+                select.empty();
+                var i = 0;
+                $.each(data.ddlArea, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    if (i == data.ddlArea.length) {
+                        if (_cod_area == "") {
+                            $("#ddlArea").val("");
+                            $("#overlay2").hide();
+                            return;
+                        }
+
+                        select = $('#ddlProceso01');
+                        select.empty();
+                        i = 0;
+                        $.each(data.ddlProceso01, function (index, item) {
+                            i += 1;
+                            select.append($('<option/>', {
+                                value: item.Value,
+                                text: item.Text,
+                                selected: item.Selected
+                            }));
+
+                            if (i == data.ddlProceso01.length) {
+                                select = $('#ddlProceso02');
+                                select.empty();
+                                i = 0;
+                                $.each(data.ddlProceso02, function (index, item) {
+                                    i += 1;
+                                    select.append($('<option/>', {
+                                        value: item.Value,
+                                        text: item.Text,
+                                        selected: item.Selected
+                                    }));
+
+                                    if (i == data.ddlProceso02.length) {
+                                        select = $('#ddlProceso03');
+                                        select.empty();
+                                        i = 0;
+                                        $.each(data.ddlProceso03, function (index, item) {
+                                            i += 1;
+                                            select.append($('<option/>', {
+                                                value: item.Value,
+                                                text: item.Text,
+                                                selected: item.Selected
+                                            }));
+                                        });
+                                        $("#overlay2").hide();
+                                    }
+                                });
+                            }
+                        })
+                    }
+                });
+            });
+
+            $("#lblAccion").val(action);
+            var modal = $(this);
+            modal.find('.modal-title').text(titulo);
+        }
+    });
+
+});
+
+    </script>
+}

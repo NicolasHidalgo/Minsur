@@ -1,0 +1,478 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Edit_Indicador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/notifications/sweet_alert.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/ui/moment/moment.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+
+<link href="~/Scripts/datepicker/bootstrap-datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/datepicker/bootstrap-datepicker.es.min.js"></script>
+
+<!-- /theme JS files -->
+<!-- modal buscador -->
+<div id="BuscarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Buscar:</h6>
+                <div class="form-group">
+                    <input class="form-control " id="global_filter" placeholder="Buscar...">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal buscador -->
+<!-- modal de confirmacion -->
+<div id="ConfirmarModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEliminar">Eliminar</button>
+                <label id="lblIdConfirm" />
+                <label id="lblParamConfirm" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /modal de confirmacion -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Configuracion de Indicador</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form horizontal -->
+        <div class="panel panel-flat">
+            @*<div class="panel-heading">
+                    <h5 class="panel-title">Basic form inputs</h5>
+                    <div class="heading-elements">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse"></a></li>
+                            <li><a data-action="reload"></a></li>
+                            <li><a data-action="close"></a></li>
+                        </ul>
+                    </div>
+                </div>*@
+
+            <div class="panel-body">
+                <form class="form-horizontal" action="#">
+                    <fieldset class="content-group">
+                        <legend class="text-bold">Registro Formulario</legend>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Cod. Unidad de Negocio</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtCodUnidadNegocio", Model.GEN_IndicadorBean.cod_unidad_negocio, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Cod. Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtCodIndicador", Model.GEN_IndicadorBean.cod_indicador, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Nom. Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtNomIndicador", Model.GEN_IndicadorBean.nom_indicador, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Unidad</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtUnidad", Model.GEN_IndicadorBean.unidad, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Frecuencia Mensual</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlFrecuenciaMes", Model.ddlFrecuenciaMes, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Frecuencia Semanal</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlFrecuenciaSem", Model.ddlFrecuenciaSem, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Frecuencia Diaria</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlFrecuenciaDia", Model.ddlFrecuenciaDia, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Tipo Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlTipoIndicador", Model.ddlTipoIndicador, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Tipo Acumulado</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlTipoAcumulado", Model.ddlTipoAcumulado, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Ponderado Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlPonderadoIndicador", Model.ddlPonderadoIndicador, new { @class = "form-control", @disabled = "disabled" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Enlace Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtEnlaceIndicador", Model.GEN_IndicadorBean.enlace_indicador, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Formula</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtFormula", Model.GEN_IndicadorBean.formula, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Formula Presupuesto</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtFormulaPresupuesto", Model.GEN_IndicadorBean.formula_presupuesto, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Perfil Autorizado</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtPerfilAutorizado", Model.GEN_IndicadorBean.perfil_autorizado, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Grupo Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlGrupoIndicador", Model.ddlGrupoIndicador, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Sub Grupo Indicador</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlSubGrupoIndicador", Model.ddlSubGrupoIndicador, new { @class = "select" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Fecha Vigencia</label>
+                            <div class="col-lg-10">
+                                <div class="input-group date col-md-12">
+                                    <input type="text" class="form-control" id="dpFechaVigencia" value="@Model.GEN_IndicadorBean.fec_vigencia" readonly />
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Fecha Fin</label>
+                            <div class="col-lg-10">
+                                <div class="input-group date col-md-12">
+                                    <input type="text" class="form-control" id="dpFechaFin" value="@Model.GEN_IndicadorBean.fec_fin" readonly />
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Importante</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtImportante", Model.GEN_IndicadorBean.importante, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Tipo Variacion</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtTipoVariacion", Model.GEN_IndicadorBean.tip_variacion, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">SQL Comando</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtSQLComando", Model.GEN_IndicadorBean.sql_comando, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Documentacion</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtDocumentacion", Model.GEN_IndicadorBean.documentacion, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Orden</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtOrden", Model.GEN_IndicadorBean.orden, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Agrupador</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtAgrupador", Model.GEN_IndicadorBean.agrupador, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Orden Semanal</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtOrdenS", Model.GEN_IndicadorBean.ordenS, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Orden Diario</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtOrdenD", Model.GEN_IndicadorBean.ordenD, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Orden Especial</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtOrdenE", Model.GEN_IndicadorBean.ordenE, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Enlace Comentario</label>
+                            <div class="col-lg-10">
+                                @Html.TextBox("txtEnlaceComentario", Model.GEN_IndicadorBean.enlace_comentario, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Vista Acumulado?</label>
+                            <div class="col-lg-1">
+                                @Html.CheckBox("chkVisAcumulado", Model.GEN_IndicadorBean.vis_acumulado, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Vista Acumulado?</label>
+                            <div class="col-lg-1">
+                                @Html.CheckBox("chkVisExcluyeParada", Model.GEN_IndicadorBean.excluye_parada, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Indicador Presupuesto</label>
+                            <div class="col-lg-10">
+                                @Html.DropDownList("ddlIndicadorPresupuesto", Model.ddlIndicadorPresupuesto, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Ver Acumulado?</label>
+                            <div class="col-lg-1">
+                                @Html.CheckBox("chkVerAcumulado", Model.GEN_IndicadorBean.ver_acumulado, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+
+
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary">Submit <i class="icon-arrow-right14 position-right"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- /form horizontal -->
+
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+<script>
+    $('#dpFechaVigencia,#dpFechaFin').datepicker({
+        pickTime: false,
+        autoclose: true,
+        language: 'es',
+        format: 'dd/mm/yyyy',
+        startView: 1,
+        clearBtn: true
+    });
+</script>
+
+@section Styles{
+    <style>
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+$(function () {
+    $('.onlyNumber').on('keydown', function (e) { -1 !== $.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) || (/65|67|86|88/.test(e.keyCode) && (e.ctrlKey === true || e.metaKey === true)) && (!0 === e.ctrlKey || !0 === e.metaKey) || 35 <= e.keyCode && 40 >= e.keyCode || (e.shiftKey || 48 > e.keyCode || 57 < e.keyCode) && (96 > e.keyCode || 105 < e.keyCode) && e.preventDefault() });
+})
+$(function () {
+
+    $('#ddlIndicadorApp,#ddlIndicadorOpe,#ddlGrupoIndicador,#ddlSubGrupoIndicador,#ddlPonderadoIndicador,#ddlIndicadorPresupuesto').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true
+    });
+
+    $('#ddlUnidad,#ddlFrecuenciaMes,#ddlFrecuenciaSem,#ddlFrecuenciaDia,#ddlTipoIndicador,#ddlTipoAcumulado').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: "",
+        allowClear: true,
+        debug: true,
+        minimumResultsForSearch: -1,
+    });
+
+
+    var codValidator = $('#FormPlantilla').validate({
+        //rules: {
+        //    txtIdePlantilla: {
+        //        required: true
+        //    },
+        //},
+        //messages: {
+        //    txtIdePlantilla: {
+        //        required: 'Ingrese el Ide Plantilla'
+        //    },
+        //},
+        //highlight: function (element) {
+        //    $(element).parent().addClass('validation-error-label')
+        //},
+        //unhighlight: function (element) {
+        //    $(element).parent().removeClass('validation-error-label')
+        //},
+
+        submitHandler: function (form, e) {
+            var _obj = {
+                cod_unidad_negocio: $('#ddlUnidadFilter option:selected').val(),
+                ide_plantilla: $('#txtIdePlantilla').val(),
+                cod_frecuencia: $('#ddlFrecuencia option:selected').val(),
+                pais: $('#ddlPais option:selected').text(),
+                cod_interno: $('#txtCodInterno').val(),
+                descripcion: $('#txtDescripcion').val(),
+                unidad: $('#txtUnidad').val(),
+                cod_indicador: $('#ddlIndicador option:selected').val(),
+                requerido: $('#chkRequerido').is(":checked"),
+                estilo_linea: $('#ddlBordeLinea option:selected').val(),
+                estilo_color: $('#txtColor').val(),
+                estilo_fondo: $('#txtFondo').val(),
+                formato: $('#ddlFormato option:selected').val(),
+                agrupado: $('#txtAgrupado').val(),
+                accion: $("#lblAccion").val() + '_XLS'
+            };
+
+            var _url = '@Url.Action("Edit_Plantilla", "APP")';
+
+            $.post(_url, _obj).done(function (data) {
+                if (data.Status === 200) {
+                    $('#RegistroModal').modal('toggle');
+                    toastr.success(data.Message);
+                    PlantillaDataTable.draw();
+                }
+                else {
+                    toastr.error(data.Message)
+                }
+            });
+        }
+    });
+
+    var tipoAcumulado = $('#ddlTipoAcumulado option:selected').val();
+    if (tipoAcumulado == "PON") {
+        $("#ddlPonderadoIndicador").prop('disabled', false);
+    } else {
+        $("#ddlPonderadoIndicador").prop('disabled', true);
+    }
+
+    $('#ddlTipoAcumulado').change(function () {
+        var tipoAcumulado = $('#ddlTipoAcumulado option:selected').val();
+        if (tipoAcumulado == "PON") {
+            $("#ddlPonderadoIndicador").prop('disabled', false);
+        } else {
+            $("#ddlPonderadoIndicador").prop('disabled', true);
+            $("#ddlPonderadoIndicador").val("").change();
+        }
+        
+    });
+
+});
+
+
+    </script>
+}

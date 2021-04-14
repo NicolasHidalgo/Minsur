@@ -1,0 +1,239 @@
+﻿@using ReportViewerForMvc;
+@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "InformeCorporativo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+<!-- /theme JS files -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-printer position-left"></i> Informe Corporativo</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnControles"><i class="icon-cogs" title="Controles"></i></a></li>
+                <li><a id="btnExportar"><i class="icon-file-excel" title="Exportar Excel"></i></a></li>
+                <li><a id="btnReporte"><i class="icon-printer2" title="Reporte"></i></a></li>
+                @*<li><a id="btnCerrar"><i class="icon-lock" title="Cierre"></i></a></li>*@
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div id="pControl" class="panel panel-flat">
+
+            <div class="panel-body">
+                <div class="col-md-12" style="margin-bottom:-12px;">
+                    <div class="form-group col-md-2 hidden">
+                        <label>Unidad:</label>
+                        @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                    </div>
+                    @*<div class="form-group col-md-2">
+                        <label>Formatos:</label>
+                        @Html.DropDownList("ddlFormato", Model.Formatos, new { @data_placeholder = "Formatos", @class = "select" })
+                    </div>*@
+                    <div class="form-group col-md-2">
+                        <label>Frecuencia:</label>
+                        @Html.DropDownList("ddlFrecuencia", Model.Frecuencias, new { @data_placeholder = "Frecuencias", @class = "select" })
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>Año:</label>
+                        @Html.DropDownList("ddlPeriodo", Model.Periodos, new { @data_placeholder = "Periodos", @class = "select" })
+                    </div>
+                    @*<div class="form-group col-md-2">
+                        <label>Mes:</label>
+                        @Html.DropDownList("ddlMes", Model.Meses, new { @data_placeholder = "Meses", @class = "select" })
+                    </div>*@
+                    <div class="form-group col-md-3">
+                        <label>Período:</label>
+                        @Html.DropDownList("ddlFecha", Model.Fechas, new { @data_placeholder = "Fechas", @class = "select" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page length options -->
+        <div id="reportView" class="img-fluid">
+            @*Aquí va el ReportView*@
+        </div>
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+
+@section Scripts{
+    <script>
+$(function () {
+
+    $('#ddlUnidad').change(function () {
+        var selectedUnidad = $(this).val();
+        if (selectedUnidad != null && selectedUnidad != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorUnidad")', { cod_unidad_negocio: selectedUnidad }, function (data) {
+                var formatosSelect = $('#ddlFormato');
+                formatosSelect.empty();
+                $.each(data.Formatos, function (index, item) {
+                    formatosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var frecuenciasSelect = $('#ddlFrecuencia');
+                frecuenciasSelect.empty();
+                $.each(data.Frecuencias, function (index, item) {
+                    frecuenciasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var periodosSelect = $('#ddlPeriodo');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+
+    $('#ddlFrecuencia').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $(this).val();
+        if (selectedFrecuencia != null && selectedFrecuencia != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorFrecuencia")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia }, function (data) {
+                var periodosSelect = $('#ddlPeriodo');
+                periodosSelect.empty();
+                $.each(data.Periodos, function (index, item) {
+                    periodosSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+    $('#ddlPeriodo').change(function () {
+        var selectedUnidad = $("#ddlUnidad").val();
+        var selectedFrecuencia = $("#ddlFrecuencia").val();
+        var selectedPeriodo = $(this).val();
+        if (selectedPeriodo != null && selectedPeriodo != '') {
+            $.getJSON('@Url.Action("JSON_GetPanelPorPeriodo")', { cod_unidad_negocio: selectedUnidad, cod_frecuencia: selectedFrecuencia, periodo: selectedPeriodo }, function (data) {
+
+                var fechasSelect = $('#ddlFecha');
+                fechasSelect.empty();
+                $.each(data.Fechas, function (index, item) {
+                    fechasSelect.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+                });
+
+            });
+        }
+    });
+
+});
+
+    $("#btnExportar").click(function () {
+        @*$("#overlay").show();
+        var codUnidadNegocio = $('#ddlUnidad').val();
+        var codFrecuencia = $('#ddlFrecuencia').val();
+        var codCargaAuxiliar = $('#ddlFormato').val();
+        var codRangoFecha = $('#ddlFecha option:selected').val();
+        var _url = '@Url.Action("RunXls", "KOP")?idx=@Session.SessionID&cod_unidad_negocio=' + codUnidadNegocio + '&cod_frecuencia=' + codFrecuencia + '&cod_rango_fecha=' + codRangoFecha +'&cod_carga_auxiliar='+codCargaAuxiliar;
+
+        $.post(_url, null).done(function (data) {
+            $("#overlay").hide();
+            if (data.Status === 200) {
+                window.location.href = '@Url.Content("~")'+'KOP/DownloadFile?archivoDestino='+ data.Message+ '&idx=@Session.SessionID';
+            }
+            else {
+                toastr.error(data.Message)
+            }
+        });*@
+    });
+
+    var url = '@Url.Action("_TableroControl", "KCS")';
+    $('#btnReporte').click(function () {
+        $("#overlay").show();
+        $("#pControl").hide();
+        var unidad = $('#ddlUnidad').val();
+        var frecuencia = $('#ddlFrecuencia').val();
+        var codCargaAuxiliar = $('#ddlFormato').val();
+        var fecha = $('#ddlFecha').val();
+
+        $('#reportView').load(url, { cod_unidad_negocio: unidad, cod_frecuencia: frecuencia, cod_rango_fecha: fecha, cod_carga_auxiliar: codCargaAuxiliar}, function () {
+			setTimeout(
+			  function(){
+			        $('iframe').contents().find('body').css('backgroundColor', '#ffffff');
+				    $("#overlay").hide();
+			  }, 8000);
+        });
+
+    })
+    $('#btnControles').click(function () {
+        if ($("#pControl").is(":visible") == true) {
+            $("#pControl").hide();
+        } else {
+            $("#pControl").show();
+        }
+
+    })
+
+    </script>
+}

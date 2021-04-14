@@ -1,0 +1,408 @@
+﻿@model Presentacion.ViewModels.AuxiliarEdit
+@{
+    ViewBag.Title = "Correo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Theme JS files -->
+<script type="text/javascript" src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/app.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/datatables_advanced.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/components_modals.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/validation/validate.min.js"></script>
+<script type="text/javascript" src="~/assets/js/core/libraries/jquery_ui/interactions.min.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_select2.js"></script>
+
+<script type="text/javascript" src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
+<script type="text/javascript" src="~/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+<script type="text/javascript" src="~/assets/js/pages/form_multiselect.js"></script>
+
+<script type="text/javascript" src="~/Scripts/jquery.stickytableheaders.min.js"></script>
+<!-- /theme JS files -->
+<!-- Basic modal -->
+<div id="modal_default" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Agregar Usuario</h6>
+                <div class="form-group">
+                    <label>Usuario:</label>
+                    <select class="form-control " id="ddlUsuario"></select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnAgregar">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+<!-- Basic modal -->
+<div id="modal_activar" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h6 class="text-semibold">Confirmar</h6>
+                <p id="pComentario"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="btnAceptar">Aceptar</button>
+                <label id="showid" />
+                <label id="accion" />
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /basic modal -->
+<!-- Main content -->
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-content">
+        </div>
+        <div class="breadcrumb-line breadcrumb-line-component">
+            <ul class="breadcrumb">
+                <li><a href="@Url.Action("Index","Home")"><i class="icon-home2 position-left"></i> Envío de correos</a></li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a id="btnAgregarModal"><i class="icon-user-tie"></i> Agregar</a></li>
+                <li><a id="btnRefrescar"><i class="icon-database-refresh"></i> Refrescar</a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- /page header -->
+    <!-- Content area -->
+    <div class="content">
+        <!-- Page length options -->
+        <div class="panel panel-flat">
+            <div class="col-md-12" style="margin-top:12px;margin-bottom:-12px;">
+                <div class="form-group col-md-4 hidden">
+                    <label>Aplicación:</label>
+                    @Html.DropDownList("ddlAplicacion", Model.Aplicaciones, new { @data_placeholder = "Aplicaciones", @class = "select", @disabled = "disabled" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Unidad:</label>
+                    @Html.DropDownList("ddlUnidad", Model.Unidades, new { @data_placeholder = "Unidades", @class = "select" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Grupo Correo:</label>
+                    @Html.DropDownList("ddlGrupoCorreo", Model.Grupos, "", new { @data_placeholder = "Grupos", @class = "select" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Buscar:</label>
+                    <input id="global_filter" placeholder="Buscar" class="form-control" />
+                </div>
+            </div>
+            <table id="CorreoDataTable" class="table table-bordered table-striped"></table>
+
+        </div>
+        <!-- /page length options -->
+    </div>
+    <!-- /content area -->
+</div>
+<!-- /main content -->
+
+@section Styles{
+    <style>
+        /*table {
+            margin: 0 auto;
+            width: 100%;
+            clear: both;
+            border-collapse: collapse;
+            table-layout: fixed;
+            word-wrap: break-word;
+        }*/
+
+        table.dataTable thead tr {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .modal {
+            text-align: center;
+            padding: 0 !important;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;
+            }
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script type="text/javascript">
+
+    $("#ddlUsuario").select2({
+        ajax: {
+            url: function () {
+                return urls.SEGApi.GetUsuariosCorreoPorNombre('N');
+            },
+            dataType: 'json',
+            type: "GET",
+            delay: 250,
+            data: function (params) {
+                return {
+                    term: params.term,
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            id: item.cod_usuario,
+                            text: item.des_usuario
+                        }
+                    })
+                };
+            },
+            cache: true
+        },
+        templateResult: function (item) {
+            if (item.loading) return item.text;
+            return item.text;
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+
+    });
+
+
+    $(function () {
+        var selectedAplicacion = $('#ddlAplicacion').val();
+        var selectedUnidad = $('#ddlUnidad').val();
+
+        if (selectedUnidad != null && selectedUnidad != '') {
+            $.getJSON('@Url.Action("JSON_GetGrupoCorreoPorUnidad")', { cod_aplicacion: selectedAplicacion, cod_unidad_negocio: selectedUnidad }, function (data) {
+                var select = $('#ddlGrupoCorreo');
+                select.empty();
+                var i = 0;
+                $.each(data, function (index, item) {
+                    i += 1;
+                    select.append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text,
+                        selected: item.Selected
+                    }));
+
+                    if (i == select.length) {
+                        CorreoDataTable.draw();
+                    }
+                });
+            });
+        }
+
+        var CorreoDataTable = $('#CorreoDataTable').DataTable({
+            autoWidth: false,
+            responsive: true,
+            searching: false,
+            ordering: false,
+            processing: true,
+            serverSide: true,
+            stateSave: false,
+            lengthChange: false,
+            info: false,
+            fixedColumns: true,
+
+            ajax: {
+                url: urls.SEGApi.GetDataTable_Correo(),
+                type: 'GET',
+                data: function (data) {
+                    var _filter = {
+                        cod_aplicacion: $('#ddlAplicacion').val(),
+                        cod_unidad_negocio: $('#ddlUnidad').val(),
+                        ide_grupo_correo: $('#ddlGrupoCorreo').val(),
+                        search: $('#global_filter').val()
+                    };
+
+                    var _order = $.map(data.order, function (item) {
+                        return {
+                            Property: data.columns[item.column].name,
+                            Direction: item.dir
+                        };
+                    });
+
+                    delete data.columns;
+                    delete data.order;
+                    delete data.search;
+
+                    data.filter = _filter;
+                    data.orderby = _order;
+                }
+            },
+            columns: [
+            {
+                title: 'UN',
+                data: 'cod_unidad_negocio',
+                name: 'cod_unidad_negocio'
+            },
+            {
+                title: 'Remitente',
+                data: 'correo_remitente',
+                name: 'correo_remitente'
+            },
+            {
+                title: 'Nombre',
+                data: 'nom_remitente',
+                name: 'nom_remitente',
+            },
+            {
+                title: 'Cod. Usuario',
+                data: 'cod_usuario',
+                name: 'cod_usuario',
+            },
+            {
+                title: 'Estado',
+                data: 'estado',
+                name: 'estado',
+                render: function (data, type, full, meta) {
+                    if (data == 'Activo')
+                        return '<td><span class="label label-success">' + data + '</span></td>'
+                    else
+                        return '<td><span class="label label-danger">' + data + '</span></td>'
+                },
+                responsivePriority: 0
+            },
+            {
+                title: "&nbsp;",
+                orderable: false,
+                width: "6%",
+                render: function (data, type, full, meta) {
+                    var dropdown = '<ul class="icons-list"><li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a>';
+                    dropdown += '<ul class="dropdown-menu dropdown-menu-right">'
+                    if (full.estado == 'Activo')
+                        dropdown += '<li><a data-toggle="modal" class="rowEstado" data-id="' + full.cod_usuario + '"><i class="icon-blocked"></i>Inactivar</a></li>';
+                    if (full.estado == 'Inactivo')
+                        dropdown += '<li><a data-toggle="modal" class="rowEstado" data-id="' + full.cod_usuario + '"><i class="icon-checkmark3"></i>Activar</a></li>';
+                    dropdown += '<li><a data-toggle="modal" class="rowEstado" data-id="' + full.cod_usuario + '"><i class="icon-trash"></i>Eliminar</a></li>';
+                    dropdown += '</ul></li></ul>';
+                    return dropdown;
+                },
+                responsivePriority: 0
+            }
+            ],
+
+        });
+
+        $('#ddlUnidad').change(function () {
+            $('#ddlGrupoCorreo').empty();
+            var selectedUnidad = $(this).val();
+            var selectedAplicacion = $("#ddlAplicacion").val();
+            if (selectedUnidad != null && selectedUnidad != '') {
+                $.getJSON('@Url.Action("JSON_GetGrupoCorreoPorUnidad")', { cod_aplicacion: selectedAplicacion, cod_unidad_negocio: selectedUnidad }, function (data) {
+                    var select = $('#ddlGrupoCorreo');
+                    select.empty();
+                    var i = 0;
+                    $.each(data, function (index, item) {
+                        i += 1;
+                        select.append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text,
+                            selected: item.Selected
+                        }));
+
+                        if (i == select.length) {
+                            CorreoDataTable.draw();
+                        }
+                    });
+                });
+            }
+        });
+
+        $('#ddlGrupoCorreo').change(function () {
+            CorreoDataTable.draw();
+        });
+        $('#btnRefrescar').click(function () {
+            CorreoDataTable.draw();
+        });
+
+        if (isMobile == false) {
+            $('#CorreoDataTable').stickyTableHeaders();
+        }
+
+        $('#global_filter').on('keyup click', function () {
+            CorreoDataTable.draw();
+        });
+
+        $("#btnAgregarModal").click(function () {
+            $('#modal_default').modal('show');
+        });
+
+        $("#btnAgregar").on("click", function () {
+            var _correo = {
+                cod_aplicacion: $("#ddlAplicacion option:selected").val(),
+                cod_unidad_negocio: $("#ddlUnidad option:selected").val(),
+                ide_grupo_correo: $("#ddlGrupoCorreo option:selected").val(),
+                cod_directorio_activo: $("#ddlUsuario option:selected").val(),
+                accion: 'Update'
+            };
+
+            var _url = '@Url.Action("Correo", "SEG")';
+
+            $.post(_url, _correo).done(function (data) {
+                if (data.Status === 200) {
+                    $('#modal_default').modal('toggle');
+                    toastr.success(data.Message).css("width", "500px");
+                    CorreoDataTable.draw();
+                } else if (data.Status === 400) {
+                    toastr.warning(data.Message).css("width", "500px");
+                } else {
+                    toastr.error(data.Message).css("width", "500px");
+                }
+            }).fail(function (jqXHR, textStatus, err) {
+                toastr.warning(err).css("width", "500px");
+            });
+        });
+
+        $("#btnAceptar").on("click", function () {
+            var _correo = {
+                cod_aplicacion: $("#ddlAplicacion option:selected").val(),
+                cod_unidad_negocio: $("#ddlUnidad option:selected").val(),
+                ide_grupo_correo: $("#ddlGrupoCorreo option:selected").val(),
+                cod_directorio_activo: $("#showid").val(),
+                accion: $("#accion").val()
+            };
+
+            var _url = '@Url.Action("Correo", "SEG")';
+
+            $.post(_url, _correo).done(function (data) {
+                if (data.Status === 200) {
+                    $('#modal_activar').modal('toggle');
+                    toastr.success(data.Message).css("width", "500px");
+                    CorreoDataTable.draw();
+                } else if (data.Status === 400) {
+                    toastr.warning(data.Message).css("width", "500px");
+                } else {
+                    toastr.error(data.Message).css("width", "500px");
+                }
+            }).fail(function (jqXHR, textStatus, err) {
+                toastr.warning(err).css("width", "500px");
+            });
+        });
+
+    });
+
+    $(document).on("click", ".rowEstado", function () {
+        var cod_usuario = $(this).data('id');
+        var accion = $(this).text();
+        $("#showid").val(cod_usuario);
+        $("#accion").val(accion);
+        document.getElementById('pComentario').innerHTML = 'Esta seguro que desea ' + accion + ' este usuario';
+        $('#modal_activar').modal('show');
+    });
+    </script>
+}

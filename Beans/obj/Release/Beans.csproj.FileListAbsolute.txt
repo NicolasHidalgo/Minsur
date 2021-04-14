@@ -1,0 +1,12 @@
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\bin\Release\Beans.dll
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\bin\Release\Beans.pdb
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\obj\Release\Beans.csproj.CoreCompileInputs.cache
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\obj\Release\Beans.dll
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\obj\Release\Beans.pdb
+C:\Users\nhidalgo\Desktop\n-capas\system\Beans\obj\Release\Beans.csprojResolveAssemblyReference.cache
+D:\Proyectos\mvc\Minsur\Beans\bin\Release\Beans.dll
+D:\Proyectos\mvc\Minsur\Beans\bin\Release\Beans.pdb
+D:\Proyectos\mvc\Minsur\Beans\obj\Release\Beans.csprojAssemblyReference.cache
+D:\Proyectos\mvc\Minsur\Beans\obj\Release\Beans.csproj.CoreCompileInputs.cache
+D:\Proyectos\mvc\Minsur\Beans\obj\Release\Beans.dll
+D:\Proyectos\mvc\Minsur\Beans\obj\Release\Beans.pdb

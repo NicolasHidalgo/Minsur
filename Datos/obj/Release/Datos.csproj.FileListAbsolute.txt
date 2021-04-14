@@ -1,0 +1,17 @@
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\bin\Release\Datos.dll
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\bin\Release\Datos.pdb
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\bin\Release\Beans.dll
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\bin\Release\Beans.pdb
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\obj\Release\Datos.csprojResolveAssemblyReference.cache
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\obj\Release\Datos.csproj.CoreCompileInputs.cache
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\obj\Release\Datos.dll
+C:\Users\nhidalgo\Desktop\n-capas\system\Datos\obj\Release\Datos.pdb
+D:\Proyectos\mvc\Minsur\Datos\bin\Release\Datos.dll
+D:\Proyectos\mvc\Minsur\Datos\bin\Release\Datos.pdb
+D:\Proyectos\mvc\Minsur\Datos\bin\Release\Beans.dll
+D:\Proyectos\mvc\Minsur\Datos\bin\Release\Beans.pdb
+D:\Proyectos\mvc\Minsur\Datos\obj\Release\Datos.csprojAssemblyReference.cache
+D:\Proyectos\mvc\Minsur\Datos\obj\Release\Datos.csproj.CoreCompileInputs.cache
+D:\Proyectos\mvc\Minsur\Datos\obj\Release\Datos.csproj.CopyComplete
+D:\Proyectos\mvc\Minsur\Datos\obj\Release\Datos.dll
+D:\Proyectos\mvc\Minsur\Datos\obj\Release\Datos.pdb
